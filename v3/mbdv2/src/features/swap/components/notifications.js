@@ -38,7 +38,7 @@ function setupNotificationSystem() {
       localStorage.setItem('transactionHistory', JSON.stringify(transactionHistory));
       localStorage.setItem('notificationState', JSON.stringify({
         lastViewedTimestamp: notificationState.lastViewedTimestamp,
-        viewedTransactionIds: []
+        viewedTransactionIds: Array.from(notificationState.viewedTransactionIds)
       }));
       updateTransactionList();
       updateNotificationBadge();
@@ -116,7 +116,7 @@ function markNotificationsAsRead() {
   notificationState.lastViewedTimestamp = Date.now();
   localStorage.setItem('notificationState', JSON.stringify({
     lastViewedTimestamp: notificationState.lastViewedTimestamp,
-    viewedTransactionIds: []
+    viewedTransactionIds: Array.from(notificationState.viewedTransactionIds)
   }));
 
   updateNotificationBadge();

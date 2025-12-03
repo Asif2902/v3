@@ -61,13 +61,22 @@ async function importToken(address, retryCount = 0) {
     importedTokens.push(newToken);
     localStorage.setItem('importedTokens', JSON.stringify(importedTokens));
 
+    const allTokens = [...defaultTokens, ...importedTokens];
+    
     if (window.tokenModals) {
-      const allTokens = [...defaultTokens, ...importedTokens];
       if (window.tokenModals.A) {
         window.tokenModals.A.tokens = allTokens;
+        window.tokenModals.A.filteredTokens = allTokens;
+        if (window.tokenModals.A.renderTokenList) {
+          window.tokenModals.A.renderTokenList();
+        }
       }
       if (window.tokenModals.B) {
         window.tokenModals.B.tokens = allTokens;
+        window.tokenModals.B.filteredTokens = allTokens;
+        if (window.tokenModals.B.renderTokenList) {
+          window.tokenModals.B.renderTokenList();
+        }
       }
     }
 

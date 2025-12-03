@@ -10,11 +10,13 @@ function shouldShowTokenWarning(address) {
 }
 
 function hideTokenWarningFor24h(address) {
-  tokenWarningCache[address.toLowerCase()] = {
+  const normalizedAddress = address.toLowerCase();
+  tokenWarningCache[normalizedAddress] = {
     timestamp: Date.now(),
     hidden: true
   };
   localStorage.setItem('tokenWarningCache', JSON.stringify(tokenWarningCache));
+  console.log('Token warning hidden for 24h:', normalizedAddress, tokenWarningCache[normalizedAddress]);
 }
 
 function showTokenImportWarning(tokenData) {
