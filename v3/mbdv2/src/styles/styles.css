@@ -651,24 +651,24 @@ header {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: -16px 0;
+  margin: -12px 0;
   position: relative;
   z-index: 2;
-  height: 0;
+  height: 24px;
 }
 
 .switch-btn {
   background: var(--surface-color);
   border: 1px solid var(--border-color);
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  width: 32px;
+  height: 32px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
 }
 
 .switch-btn:hover {
