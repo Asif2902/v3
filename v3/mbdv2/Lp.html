@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mon Bridge Dex – Add Liquidity</title>
+  <!-- External libraries & fonts -->
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/styles.css">
+<script src="src/components/common/animation.js"></script>
+<style>   
+
+.dex-pool {
+      border: 1px solid #334155;
+      padding: 10px;
+      margin-bottom: 10px;
+      cursor: pointer;
+    }
+    .dex-pool.selected {
+      background-color: black;
+    }
+    #manualDexSelect {
+      margin-top: 10px;
+    }
+
+  </style>
+</head>
+<body>
+  <div id="lpNotifications"></div>
+  <header>
+    <div class="header-logo">
+      <a href="https://monbridgedex.xyz" target="_blank">
+        <img src="https://monbridgedex.xyz/Tokenlogo.png" alt="Mon Bridge Dex Logo" />
+      </a>
+    </div>
+
+    <nav class="desktop-nav">
+     <a href="/" class="nav-item">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="23 4 23 10 17 10"></polyline>
+    <polyline points="1 20 1 14 7 14"></polyline>
+    <path d="M3.51 9a9 9 0 0 1 14.13-3.36L23 10"></path>
+    <path d="M20.49 15a9 9 0 0 1-14.13 3.36L1 14"></path>
+  </svg>
+  Trade
+</a>
+      <div class="nav-dropdown active">
+        <div class="nav-item nav-dropdown-trigger">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M8 14c1.5 1 4.5 1 6 0"></path>
+            <path d="M8 10c1.5 1 4.5 1 6 0"></path>
+          </svg>
+          Pool
+          <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <div class="nav-dropdown-menu">
+          <a href="/Lp" class="nav-dropdown-item active">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Create Pool
+          </a>
+          <a href="/RemoveLp" class="nav-dropdown-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Manage Pool
+          </a>
+        </div>
+      </div>
+      <a href="https://monadbridge.com/?toChain=Monad&toToken=MON&fromChain=Base&fromToken=ETH" class="nav-item" target="_blank">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Bridge
+      </a>
+    </nav>
+
+    <button id="connectWallet">
+      Connect
+    </button>
+  </header>
+
+  <!-- Add LP Notification Modal -->
+  <div id="addLpNotificationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 2000; backdrop-filter: blur(5px);">
+    <div style="position: relative; background-color: #1a1a1a; width: 90%; max-width: 500px; max-height: 80vh; margin: 50px auto; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); color: #fff; overflow: hidden; display: flex; flex-direction: column;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="margin: 0; color: #6366f1;">Transaction History</h3>
+        <span id="closeAddLpNotification" style="font-size: 28px; color: #94a3b8; cursor: pointer; line-height: 1;">&times;</span>
+      </div>
+
+      <div id="addLpTransactionList" style="flex: 1; overflow-y: auto; margin-bottom: 15px;">
+        <div class="no-transactions"><p>No transactions yet</p></div>
+      </div>
+
+      <button id="clearAddLpNotifications" style="display: none; background: #334155; color: #fff; border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-weight: 600;">Clear All</button>
+    </div>
+  </div>
+  <div class="background">
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+  </div>
+  <div class="container">
+    <div class="liquidity-section">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3 style="margin: 0;">Add Liquidity</h3>
+        <button id="addLpNotificationButton" class="notification-button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span id="addLpNotificationBadge" class="notification-badge"></span>
+        </button>
+      </div>
+      <!-- Token Pair Selection -->
+      <div class="pair-selection" style="display: flex; gap: 20px; margin-bottom: 15px;">
+        <!-- Token A Section -->
+        <div style="flex:1;">
+          <label id="tokenALabel">Token A</label>
+          <div class="token-select" id="tokenASelect" style="border: 1px solid #334155; padding: 8px; border-radius: 5px; cursor: pointer;">
+            <span id="tokenADisplay">
+              <img id="tokenALogo" src="https://monbridgedex.xyz/unknown.png" alt="Token Logo" />
+              <span id="tokenASymbol">Select Token</span>
+            </span>
+          </div>
+          <div class="balance-display" id="tokenABalanceDisplay">Balance: <span id="tokenABalance">-</span></div>
+          <div class="scrollable-tokens" id="tokenAList"></div>
+          <div class="amount-container" style="margin-top:5px;">
+            <input type="number" id="tokenAAmount" placeholder="Amount" />
+            <div class="max-text" id="tokenAMaxText" style="cursor:pointer;">Max</div>
+          </div>
+        </div>
+        <!-- Token B Section -->
+        <div style="flex:1;">
+          <label id="tokenBLabel">Token B</label>
+          <div class="token-select" id="tokenBSelect" style="border: 1px solid
+          #334155; padding: 8px; border-radius: 5px; cursor: pointer;">
+            <span id="tokenBDisplay">
+              <img id="tokenBLogo" src="https://monbridgedex.xyz/unknown.png" alt="Token Logo" />
+              <span id="tokenBSymbol">Select Token</span>
+            </span>
+          </div>
+          <div class="balance-display" id="tokenBBalanceDisplay">Balance: <span id="tokenBBalance">-</span></div>
+          <div class="scrollable-tokens" id="tokenBList"></div>
+          <div class="amount-container" style="margin-top:5px;">
+            <input type="number" id="tokenBAmount" placeholder="Amount " />
+            <div class="max-text" id="tokenBMaxText" style="cursor:pointer;">Max</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section for Available DEX Pools -->
+      <div id="dexPoolsSection" style="margin-bottom:15px;">
+        <h4>Available DEX Pools</h4>
+        <div id="dexPoolsContainer" style="max-height: 155px; overflow-y: auto;
+        border: 1px solid #334155; border-radius: 8px; padding: 5px;">
+          <div id="dexPools">Select both tokens to load available DEX pools...</div>
+        </div>
+        <button id="manualDexToggle" style="margin-top:10px;">Manual Selection</button>
+        <div id="manualDexSelect" style="display:none;">
+          <select id="dexDropdown" style="padding: 8px 12px; border: 1px solid
+          #ccc; border-radius: 5px; background-color: #1a1a1a; font-size: 16px;
+          color: #fff;">
+          </select>
+        </div>
+      </div>
+
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+        <h4 style="margin: 0;">Liquidity Information</h4>
+      </div>
+      <div class="info-box" id="liquidityInfo" style="margin-top:5px; position: relative;">
+        <div>Liquidity Ratio: <span id="liquidityRatio">-</span></div>
+        <div>Pair Price: <span id="pairPrice">-</span></div>
+        <div>Expected LP Tokens: <span id="expectedLpTokens">-</span></div>
+        <div>Pool Share: <span id="poolSharePercent">-</span></div>
+      </div>
+
+      <button id="addLiquidityButton" style="margin-top:15px;" disabled>Add Liquidity</button>
+    </div>
+  </div>
+  <div id="notifications"></div>
+
+<!-- Constants -->
+<script src="src/constants/tokenlist.js"></script>
+<script src="src/constants/network.js"></script>
+<script src="src/constants/routers.js"></script>
+<script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+
+<!-- Shared Utilities -->
+<script src="src/constants/abis.js"></script>
+<script src="src/lib/rateLimiter.js"></script>
+<script src="src/lib/formatters.js"></script>
+<script src="src/services/notifications.js"></script>
+<script src="src/services/contracts.js"></script>
+
+<!-- Common Components -->
+<script src="src/components/common/token-modal.js"></script>
+<script src="src/components/common/animation.js"></script>
+<script src="src/components/common/dropdown-nav.js"></script>
+<script src="src/contexts/wallet.js"></script>
+
+<!-- Add Liquidity Feature Files -->
+<script src="src/features/liquidity/add/state/state.js"></script>
+<script src="src/features/liquidity/add/components/tokenHandlers.js"></script>
+<script src="src/features/liquidity/add/services/dexPools.js"></script>
+<script src="src/features/liquidity/add/services/refresh.js"></script>
+<script src="src/features/liquidity/add/services/poolInfo.js"></script>
+<script src="src/features/liquidity/add/components/inputHandlers.js"></script>
+<script src="src/features/liquidity/add/services/approval.js"></script>
+<script src="src/features/liquidity/add/services/simulation.js"></script>
+<script src="src/features/liquidity/add/components/modals.js"></script>
+<script src="src/features/liquidity/add/services/walletIntegration.js"></script>
+<script src="src/features/liquidity/add/services/transactionHistory.js"></script>
+<script src="src/features/liquidity/add/services/transaction.js"></script>
+<script src="src/features/liquidity/add/index.js"></script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+      if (typeof initializeTokenModals === 'function' && typeof importToken === 'function') {
+        window.importToken = importToken;
+
+        initializeTokenModals({
+          tokens: (typeof getAllTokens === 'function' ? getAllTokens() : null) || [...defaultTokens, ...(window.lpImportedTokens || [])],
+          defaultTokens: (defaultTokens || []).slice(0, 5),
+          onSelectTokenA: function(token) {
+            if (typeof onSelectTokenA === 'function') {
+              onSelectTokenA(token);
+            }
+          },
+          onSelectTokenB: function(token) {
+            if (typeof onSelectTokenB === 'function') {
+              onSelectTokenB(token);
+            }
+          },
+          provider: window.lpState ? window.lpState.provider : null,
+          userAddress: window.lpState ? window.lpState.userAddress : null
+        });
+        
+        console.log('Token modals initialized successfully');
+      } else {
+        console.error('Required functions not available:', {
+          initializeTokenModals: typeof initializeTokenModals === 'function',
+          importToken: typeof importToken === 'function'
+        });
+      }
+    }, 500);
+  });
+</script>    
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Mon Bridge Dex",
+  "url": "https://monbridgedex.xyz",
+  "description": "Mon Bridge Dex is an advanced DEX aggregator that bridges multiple decentralized exchanges to provide the best swap rates on Monad.",
+  "image": "https://monbridgedex.xyz/card.png",
+  "author": {
+    "@type": "Person",
+    "name": "MonBridgeDex",
+    "url": "https://x.com/monbridgedex"
+  }
+}
+</script>
+  <!-- Liquidity Confirmation Modal -->
+<div id="liquidityConfirmationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 2000; backdrop-filter: blur(5px);">
+  <div style="position: relative; background-color: #1a1a1a; width: 90%; max-width: 450px; margin: 50px auto; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: modalBounceIn 0.5s; color: #fff;">
+
+    <div style="position: absolute; top: 15px; right: 15px; font-size: 24px; color: #94a3b8; cursor: pointer;" onclick="hideLiquidityConfirmationModal()">×</div>
+
+    <h3 style="text-align: center; margin-bottom: 20px; color: #6366f1;">Confirm Add Liquidity</h3>
+
+    <!-- Tokens Section -->
+    <div style="display: flex; justify-content: space-between; margin-bottom: 25px;">
+
+      <!-- Token A -->
+      <div style="flex: 1; text-align: center; padding: 10px; border-radius: 12px; background: #0a0a0a; border: 1px solid #334155;">
+        <img id="confirmTokenALogo" style="width: 40px; height: 40px; border-radius: 50%; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+        <div id="confirmTokenAAmount" style="font-size: 16px; font-weight: 700; margin-bottom: 4px;"></div>
+        <div id="confirmTokenASymbol" style="font-size: 14px; color: #94a3b8;"></div>
+      </div>
+
+      <div style="display: flex; align-items: center; padding: 0 15px;">
+        <div style="font-size: 20px; color: #6366f1;">+</div>
+      </div>
+
+      <!-- Token B -->
+      <div style="flex: 1; text-align: center; padding: 10px; border-radius: 12px; background: #0a0a0a; border: 1px solid #334155;">
+        <img id="confirmTokenBLogo" style="width: 40px; height: 40px; border-radius: 50%; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+        <div id="confirmTokenBAmount" style="font-size: 16px; font-weight: 700; margin-bottom: 4px;"></div>
+        <div id="confirmTokenBSymbol" style="font-size: 14px; color: #94a3b8;"></div>
+      </div>
+    </div>
+
+    <!-- Details Section -->
+    <div style="background: #0a0a0a; border: 1px solid #334155; border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+      <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+        <div style="color: #94a3b8;">Selected DEX</div>
+        <div id="confirmDexName" style="font-weight: 600;"></div>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+        <div style="color: #94a3b8;">Pair Price</div>
+        <div id="confirmPairPrice" style="font-weight: 600;"></div>
+      </div>
+      <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+        <div style="color: #94a3b8;">Expected LP Tokens</div>
+        <div id="confirmLpTokens" style="font-weight: 600;"></div>
+      </div>
+      <div style="display: flex; justify-content: space-between;">
+        <div style="color: #94a3b8;">Pool Share After</div>
+        <div id="confirmPoolShare" style="font-weight: 600;"></div>
+      </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div style="display: flex; gap: 12px;">
+      <button id="cancelLiquidityBtn" style="flex: 1; background: #334155; color: #fff; border: none; border-radius: 8px; padding: 10px;" onclick="hideLiquidityConfirmationModal()">Cancel</button>
+      <button id="confirmLiquidityBtn" style="flex: 1; background: #6366f1; color: #fff; border: none; border-radius: 8px; padding: 10px;" onclick="confirmAndAddLiquidity()">Confirm</button>
+    </div>
+
+  </div>
+</div>
+
+  
+
+  <div class="mobile-footer">
+    <nav class="mobile-footer-nav">
+<a href="/" class="mobile-footer-item">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="23 4 23 10 17 10"></polyline>
+    <polyline points="1 20 1 14 7 14"></polyline>
+    <path d="M3.51 9a9 9 0 0 1 14.13-3.36L23 10"></path>
+    <path d="M20.49 15a9 9 0 0 1-14.13 3.36L1 14"></path>
+  </svg>
+  <span>Trade</span>
+</a>
+      <div class="mobile-footer-dropdown active">
+        <div class="mobile-footer-item mobile-footer-trigger">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M8 14c1.5 1 4.5 1 6 0"></path>
+            <path d="M8 10c1.5 1 4.5 1 6 0"></path>
+          </svg>
+          <span>Pool</span>
+        </div>
+        <div class="mobile-footer-dropdown-menu">
+          <a href="/Lp" class="mobile-footer-dropdown-item active">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Create Pool
+          </a>
+          <a href="/RemoveLp" class="mobile-footer-dropdown-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Manage Pool
+          </a>
+        </div>
+      </div>
+      <a href="https://monadbridge.com/" class="mobile-footer-item" target="_blank">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        <span>Bridge</span>
+      </a>
+    </nav>
+  </div>
+
+  <script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

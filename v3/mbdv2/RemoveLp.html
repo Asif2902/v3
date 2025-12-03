@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mon Bridge Dex – Remove Liquidity</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/styles.css">
+  <meta name="theme-color" content="#200052">
+  <link rel="apple-touch-icon" href="https://monbridgedex.xyz/Tokenlogo.png">
+<script src="src/components/common/animation.js"></script>
+</head>
+<body>
+  <header>
+    <div class="header-logo">
+      <a href="https://monbridgedex.xyz" target="_blank">
+        <img src="https://monbridgedex.xyz/Tokenlogo.png" alt="Mon Bridge Dex Logo" />
+      </a>
+    </div>
+
+    <nav class="desktop-nav">
+  <a href="/" class="nav-item">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="23 4 23 10 17 10"></polyline>
+    <polyline points="1 20 1 14 7 14"></polyline>
+    <path d="M3.51 9a9 9 0 0 1 14.13-3.36L23 10"></path>
+    <path d="M20.49 15a9 9 0 0 1-14.13 3.36L1 14"></path>
+  </svg>
+  Trade
+</a>
+      <div class="nav-dropdown active">
+        <div class="nav-item nav-dropdown-trigger">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M8 14c1.5 1 4.5 1 6 0"></path>
+            <path d="M8 10c1.5 1 4.5 1 6 0"></path>
+          </svg>
+          Pool
+          <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <div class="nav-dropdown-menu">
+          <a href="/Lp" class="nav-dropdown-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Create Pool
+          </a>
+          <a href="/RemoveLp" class="nav-dropdown-item active">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Manage Pool
+          </a>
+        </div>
+      </div>
+      <a href="https://monadbridge.com/?toChain=Monad&toToken=MON&fromChain=Base&fromToken=ETH" class="nav-item" target="_blank">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Bridge
+      </a>
+    </nav>
+
+    <button id="connectWallet">
+      Connect
+    </button>
+  </header>
+
+  <!-- Remove LP Notification Modal -->
+  <div id="removeLpNotifications"></div>
+  
+  <div id="removeLpNotificationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 2000; backdrop-filter: blur(5px);">
+    <div style="position: relative; background-color: #1a1a1a; width: 90%; max-width: 500px; max-height: 80vh; margin: 50px auto; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); color: #fff; overflow: hidden; display: flex; flex-direction: column;">
+      
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h3 style="margin: 0; color: #6366f1;">Transaction History</h3>
+        <span id="closeRemoveLpNotification" style="font-size: 28px; color: #94a3b8; cursor: pointer; line-height: 1;">&times;</span>
+      </div>
+
+      <div id="removeLpTransactionList" style="flex: 1; overflow-y: auto; margin-bottom: 15px;">
+        <div class="no-transactions"><p>No transactions yet</p></div>
+      </div>
+
+      <button id="clearRemoveLpNotifications" style="display: none; background: #334155; color: #fff; border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-weight: 600;">Clear All</button>
+    </div>
+  </div>
+
+  <div class="background">
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+  </div>
+
+  <div class="container">
+    <div class="liquidity-section">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+        <h3 style="margin: 0;">Remove Liquidity</h3>
+        <button id="removeLpNotificationButton" class="notification-button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span id="removeLpNotificationBadge" class="notification-badge"></span>
+        </button>
+      </div>
+
+<div>
+  <!-- DEX Router Selection -->
+  <label for="routerSelect">Select DEX Router</label>
+</div>
+      <select id="routerSelect" class="custom-select" style="
+    padding: 12px 15px;
+    border: 1px solid #334155;
+    border-radius: 12px;
+    background-color: #1a1a1a;
+    font-size: 16px;
+    color: #fff;
+    cursor: pointer;
+    outline: none;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    width: 100%;
+    max-width: 100%;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    transition: all 0.3s ease;
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9IiM2NjYiIHN0cm9rZS13aWR0aD0iMiIgc3Ryb2tlLWxpbmVjYXA9InJvdW5kIiBzdHJva2UtbGluZWpvaW49InJvdW5kIj48cGF0aCBkPSJNNiA5bDYgNiA2LTYiLz48L3N2Zz4=');
+    background-repeat: no-repeat;
+    background-position: right 15px center;
+    background-size: 16px;
+">
+        <!-- Router options will be populated by JavaScript from routers.js -->
+      </select>
+      
+
+      <!-- Token Pair Selection (using only the token-modal component) -->
+      <div class="token-pair" style="display:flex; gap:20px; margin-top:15px;">
+        <!-- Token A Section -->
+        <div style="flex:1;">
+          <label id="tokenALabel">Token A</label>
+          <div class="token-select" id="tokenASelect">
+            <span id="tokenADisplay">
+              <img id="tokenALogo" src="https://monbridgedex.xyz/unknown.png" alt="Token Logo" />
+              <span id="tokenASymbol">Select Token</span>
+            </span>
+          </div>
+          <div class="balance-display" id="tokenABalanceDisplay">Balance: <span id="tokenABalance">-</span></div>
+        </div>
+        <!-- Token B Section -->
+        <div style="flex:1;">
+          <label id="tokenBLabel">Token B</label>
+          <div class="token-select" id="tokenBSelect">
+            <span id="tokenBDisplay">
+              <img id="tokenBLogo" src="https://monbridgedex.xyz/unknown.png" alt="Token Logo" />
+              <span id="tokenBSymbol">Select Token</span>
+            </span>
+          </div>
+          <div class="balance-display" id="tokenBBalanceDisplay">Balance: <span id="tokenBBalance">-</span></div>
+        </div>
+      </div>
+
+      <div id="lpInfo" class="info-box" style="margin-top:15px;">
+        <div style="display: flex; align-items: center; margin-bottom: 8px;">
+          <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #836EF9, #A0055D); border-radius: 50%; margin-right: 10px;"></div>
+          <p style="font-weight: 600;">LP: <span id="lpTokenNameDisplay">-</span></p>
+        </div>
+        <div style="display: flex; align-items: center;">
+          <div style="width: 24px; height: 24px; background: linear-gradient(45deg, #4FACFE, #836EF9); border-radius: 50%; margin-right: 10px;"></div>
+          <p>Your LP Balance: <span id="lpBalanceDisplay" style="font-weight: 600;">-</span></p>
+        </div>
+      </div>
+
+      <div id="removeLiquiditySection" style="margin-top:15px;">
+        <label>LP Tokens to Remove</label>
+        <div class="amount-container">
+          <input type="number" id="lpAmount" placeholder="LP tokens" />
+          <div class="max-text" id="lpMaxText">Max</div>
+        </div>
+        <div id="estimatedOutput" class="info-box" style="margin-top:15px; transition: all 0.3s ease; overflow: hidden;"></div>
+        <style>
+          @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          #estimatedOutput > * {
+            animation: fadeIn 0.4s ease-out forwards;
+          }
+        </style>
+        <button id="removeLiquidityButton" data-action="remove" style="margin-top:15px; font-weight: 600; letter-spacing: 0.5px; position: relative; overflow: hidden;">
+          <span style="position: relative; z-index: 2;">Remove Liquidity</span>
+          <span style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(45deg, #836EF9, #FF6EC7); opacity: 0; transition: opacity 0.3s; z-index: 1;"></span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="notifications"></div>
+
+  <!-- Remove Liquidity Confirmation Modal -->
+  <div id="removeLiquidityConfirmationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 2000; backdrop-filter: blur(5px);">
+    <div style="position: relative; background-color: #1a1a1a; width: 90%; max-width: 450px; margin: 50px auto; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); animation: modalBounceIn 0.5s; color: #fff;">
+      
+      <h3 style="text-align: center; margin-bottom: 20px; color: #6366f1;">Confirm Remove Liquidity</h3>
+      
+      <!-- LP Tokens Section -->
+      <div style="background: #0a0a0a; border: 1px solid #334155; border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
+          <div style="width: 24px; height: 24px; background: linear-gradient(135deg, #836EF9, #A0055D); border-radius: 50%; margin-right: 10px;"></div>
+          <div style="font-weight: 600;">Removing LP Tokens</div>
+        </div>
+        <div id="confirmRemoveLpAmount" style="font-size: 20px; font-weight: 700; text-align: center;"></div>
+      </div>
+      
+      <!-- Tokens Section -->
+      <div style="display: flex; justify-content: space-between; margin-bottom: 25px;">
+        <!-- Token A -->
+        <div style="flex: 1; text-align: center; padding: 10px; border-radius: 12px; background: #0a0a0a; border: 1px solid #334155;">
+          <img id="confirmTokenALogo" style="width: 40px; height: 40px; border-radius: 50%; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+          <div id="confirmTokenAAmount" style="font-size: 16px; font-weight: 700; margin-bottom: 4px;"></div>
+          <div id="confirmTokenASymbol" style="font-size: 14px; color: #94a3b8;"></div>
+        </div>
+        
+        <div style="display: flex; align-items: center; padding: 0 15px;">
+          <div style="font-size: 20px; color: #6366f1;">+</div>
+        </div>
+        
+        <!-- Token B -->
+        <div style="flex: 1; text-align: center; padding: 10px; border-radius: 12px; background: #0a0a0a; border: 1px solid #334155;">
+          <img id="confirmTokenBLogo" style="width: 40px; height: 40px; border-radius: 50%; margin-bottom: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.3);">
+          <div id="confirmTokenBAmount" style="font-size: 16px; font-weight: 700; margin-bottom: 4px;"></div>
+          <div id="confirmTokenBSymbol" style="font-size: 14px; color: #94a3b8;"></div>
+        </div>
+      </div>
+      
+      <!-- Details Section -->
+      <div style="background: #0a0a0a; border: 1px solid #334155; border-radius: 12px; padding: 15px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+          <div style="color: #94a3b8;">Selected DEX</div>
+          <div id="confirmRemoveDexName" style="font-weight: 600;"></div>
+        </div>
+      </div>
+      
+      <!-- Action Buttons -->
+      <div style="display: flex; gap: 12px;">
+        <button id="cancelRemoveLiquidityBtn" style="flex: 1; background: #334155; color: #fff; border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-weight: 600;">Cancel</button>
+        <button id="confirmRemoveLiquidityBtn" style="flex: 1; background: #6366f1; color: #fff; border: none; border-radius: 8px; padding: 10px; cursor: pointer; font-weight: 600;">Confirm</button>
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- Constants -->
+<script src="src/constants/tokenlist.js"></script>
+<script src="src/constants/network.js"></script>
+<script src="src/constants/routers.js"></script>
+<script src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"></script>
+
+<!-- Shared Utilities -->
+<script src="src/constants/abis.js"></script>
+<script src="src/lib/rateLimiter.js"></script>
+<script src="src/lib/formatters.js"></script>
+<script src="src/services/notifications.js"></script>
+<script src="src/services/contracts.js"></script>
+
+<!-- Common Components -->
+<script src="src/components/common/dropdown-nav.js"></script>
+<script src="src/contexts/wallet.js"></script>
+<script src="src/components/common/token-modal.js"></script>
+
+<!-- Remove Liquidity Feature Files -->
+<script src="src/features/liquidity/remove/state/index.js"></script>
+<script src="src/features/liquidity/remove/services/wallet.js"></script>
+<script src="src/features/liquidity/remove/services/tokenBalance.js"></script>
+<script src="src/features/liquidity/remove/services/lpInfo.js"></script>
+<script src="src/features/liquidity/remove/services/transactionHistory.js"></script>
+<script src="src/features/liquidity/remove/components/tokenSelectors.js"></script>
+<script src="src/features/liquidity/remove/components/estimatedOutput.js"></script>
+<script src="src/features/liquidity/remove/components/modals.js"></script>
+<script src="src/features/liquidity/remove/services/transaction.js"></script>
+<script src="src/features/liquidity/remove/init/index.js"></script>
+
+
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Mon Bridge Dex",
+  "url": "https://monbridgedex.xyz",
+  "description": "Mon Bridge Dex is an advanced DEX aggregator that bridges multiple decentralized exchanges to provide the best swap rates on Monad.",
+  "image": "https://monbridgedex.xyz/card.png",
+  "author": {
+    "@type": "Person",
+    "name": "MonBridgeDex",
+    "url": "https://x.com/monbridgedex"
+  }
+}
+</script>
+  <div class="mobile-footer">
+    <nav class="mobile-footer-nav">
+   <a href="/" class="mobile-footer-item">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="23 4 23 10 17 10"></polyline>
+    <polyline points="1 20 1 14 7 14"></polyline>
+    <path d="M3.51 9a9 9 0 0 1 14.13-3.36L23 10"></path>
+    <path d="M20.49 15a9 9 0 0 1-14.13 3.36L1 14"></path>
+  </svg>
+  <span>Trade</span>
+</a>
+      <div class="mobile-footer-dropdown active">
+        <div class="mobile-footer-item mobile-footer-trigger">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M8 14c1.5 1 4.5 1 6 0"></path>
+            <path d="M8 10c1.5 1 4.5 1 6 0"></path>
+          </svg>
+          <span>Pool</span>
+        </div>
+        <div class="mobile-footer-dropdown-menu">
+          <a href="/Lp" class="mobile-footer-dropdown-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Create Pool
+          </a>
+          <a href="/RemoveLp" class="mobile-footer-dropdown-item active">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Manage Pool
+          </a>
+        </div>
+      </div>
+      <a href="https://monadbridge.com/" class="mobile-footer-item" target="_blank">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        <span>Bridge</span>
+      </a>
+    </nav>
+  </div>
+
+<script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

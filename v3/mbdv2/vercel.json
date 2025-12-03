@@ -1,0 +1,22 @@
+{
+  "version": 2,
+  "routes": [
+    {
+      "src": "/lp",
+      "dest": "/Lp.html"
+    },
+    {
+      "src": "/RemoveLP",
+      "dest": "/RemoveLp.html"
+    },
+    {"src": "/swap",
+      "dest": "index.html"
+    },
+        {"src": "/",
+      "dest": "index.html"
+    },
+    {"src": "/trade",
+      "dest": "index.html"
+    }
+    ]
+}

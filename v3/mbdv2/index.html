@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mon bridge Dex UI</title>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100;200;300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="src/styles/styles.css">
+  <script src="src/components/common/animation.js"></script>
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Mon Bridge Dex - Best Swap Rates on Monad">
+  <meta name="twitter:description" content="Mon Bridge Dex compares multiple DEX routers to deliver the best swap output for your trades on Monad.".
+  <meta name="twitter:image" content="https://monbridgedex.xyz/card.png">
+  <meta name="twitter:site" content="@monbridgedex">
+  <meta name="twitter:creator" content="@monbridgedex">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Mon Bridge Dex - Best Swap Rates on Monad">
+  <meta property="og:description" content="Mon Bridge Dex is an advanced aggregator that bridges multiple DEXes to secure the best swap output for your trades on Monad.">
+  <meta property="og:image" content="https://monbridgedex.xyz/card.png">
+  <meta property="og:url" content="https://monbridgedex.xyz">
+  <meta property="og:site_name" content="Mon Bridge Dex">
+  <meta name="title" content="Mon Bridge Dex - Best Swap Rates on Monad">
+  <meta name="description" content="Mon Bridge Dex is a powerful aggregator that compares multiple DEX routers to deliver the best swap output for your trades on Monad."
+  <meta name="keywords" content="Mon Bridge Dex, Monad Testnet, DeFi aggregator,
+best swap rates, DEX bridge, crypto trading, Monad Dex aggregator">
+  <meta name="robots" content="index, follow">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="author" content="Asif Iqbal">
+</head>
+<body>
+<header>
+  <div class="header-logo">
+    <a href="https://monbridgedex.xyz" target="_blank">
+      <img src="https://monbridgedex.xyz/Tokenlogo.png" alt="Mon Bridge Dex Logo" />
+    </a>
+  </div>
+
+  <nav class="desktop-nav">
+<a href="/" class="nav-item">
+  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="23 4 23 10 17 10"></polyline>
+    <polyline points="1 20 1 14 7 14"></polyline>
+    <path d="M3.51 9a9 9 0 0 1 14.13-3.36L23 10"></path>
+    <path d="M20.49 15a9 9 0 0 1-14.13 3.36L1 14"></path>
+  </svg>
+  Trade
+</a>
+      <div class="nav-dropdown">
+        <div class="nav-item nav-dropdown-trigger">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <path d="M8 14c1.5 1 4.5 1 6 0"></path>
+            <path d="M8 10c1.5 1 4.5 1 6 0"></path>
+          </svg>
+          Pool
+          <svg class="dropdown-arrow" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <div class="nav-dropdown-menu">
+          <a href="/Lp" class="nav-dropdown-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="12" y1="8" x2="12" y2="16"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Create Pool
+          </a>
+          <a href="/RemoveLp" class="nav-dropdown-item">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="12" cy="12" r="10"/>
+              <line x1="8" y1="12" x2="16" y2="12"/>
+            </svg>
+            Manage Pool
+          </a>
+        </div>
+      </div>
+      <a
+      href="https://monadbridge.com/?toChain=Monad&toToken=MON&fromChain=Base&fromToken=ETH"
+      class="nav-item" target="_blank">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+        Bridge
+      </a>
+    </nav>
+
+  <button id="connectWallet">
+    Connect
+  </button>
+</header>
+
+<div class="mobile-footer">
+  <nav class="mobile-footer-nav">
+<a href="/" class="mobile-footer-item active">
+  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+    <polyline points="23 4 23 10 17 10"></polyline>
+    <polyline points="1 20 1 14 7 14"></polyline>
+    <path d="M3.51 9a9 9 0 0 1 14.13-3.36L23 10"></path>
+    <path d="M20.49 15a9 9 0 0 1-14.13 3.36L1 14"></path>
+  </svg>
+  <span>Trade</span>
+</a>
+    <div class="mobile-footer-dropdown">
+      <div class="mobile-footer-item mobile-footer-trigger">
+        <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10"></circle>
+          <path d="M8 14c1.5 1 4.5 1 6 0"></path>
+          <path d="M8 10c1.5 1 4.5 1 6 0"></path>
+        </svg>
+        <span>Pool</span>
+      </div>
+      <div class="mobile-footer-dropdown-menu">
+        <a href="/Lp" class="mobile-footer-dropdown-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="12" y1="8" x2="12" y2="16"/>
+            <line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          Create Pool
+        </a>
+        <a href="/RemoveLp" class="mobile-footer-dropdown-item">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"/>
+            <line x1="8" y1="12" x2="16" y2="12"/>
+          </svg>
+          Manage Pool
+        </a>
+      </div>
+    </div>
+    <a href="https://monadbridge.com/" class="mobile-footer-item" target="_blank">
+      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+      <span>Bridge</span>
+    </a>
+  </nav>
+</div>
+<div class="background">
+  <div class="orb"></div>
+  <div class="orb"></div>
+  <div class="orb"></div>
+  <div class="orb"></div>
+  <div class="orb"></div>
+</div>
+<div class="container">
+  <div class="swap-section">
+    <div class="swap-header">
+      <h3>Swap</h3>
+      <div style="display: flex; gap: 8px;">
+        <button id="refreshButton" class="refresh-button">
+          <svg id="refreshIcon" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path>
+            <path d="M21 3v5h-5"></path>
+            <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path>
+            <path d="M3 21v-5h5"></path>
+          </svg>
+          <div id="refreshProgress" class="refresh-progress">
+            <svg width="36" height="36" viewBox="0 0 36 36">
+              <circle class="refresh-progress-bg" cx="18" cy="18" r="16"></circle>
+              <circle class="refresh-progress-fill" cx="18" cy="18" r="16"></circle>
+            </svg>
+          </div>
+        </button>
+        <button id="notificationButton" class="notification-button">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+          <span id="notificationBadge" class="notification-badge" style="display: none;">0</span>
+        </button>
+        <button id="settingsButton" class="settings-button"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg></button>
+      </div>
+    </div>
+    <div class="divider"></div>
+
+    <!-- Settings Modal -->
+    <div id="settingsModal" class="settings-modal">
+      <div class="settings-modal-content">
+        <div class="settings-header">
+          <h2>Settings</h2>
+          <button id="closeSettings" class="close-settings">&times;</button>
+        </div>
+        <div class="settings-body">
+          <div class="settings-section">
+            <h4>Slippage Tolerance (%)</h4>
+            <div class="slippage-options">
+              <button class="slippage-option active" data-value="auto">Auto</button>
+              <button class="slippage-option" data-value="custom">Custom</button>
+              <div style="display: flex; align-items: center;">
+                <input type="number" id="customSlippage" class="custom-slippage" placeholder="1.00" value="1.00" disabled />
+                <span class="percentage-symbol">%</span>
+              </div>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h4>Transaction Deadline</h4>
+            <div class="deadline-input">
+              <input type="number" id="transactionDeadline" value="20" />
+              <span class="deadline-unit">min</span>
+            </div>
+          </div>
+          <div class="settings-section">
+            <h4>Routing Mode</h4>
+            <div class="routing-mode-container">
+              <select id="routingModeSelect" class="routing-mode-select">
+                <option value="auto">Auto (Best Route)</option>
+                <option value="single">Single Router</option>
+                <option value="multi">Multi-Split Hops</option>
+              </select>
+            </div>
+            <div class="toggle-description">
+              Auto mode compares both single and multi-split routes in parallel and selects the best output
+            </div>
+          </div>
+          <div class="settings-section">
+            <h4>Transaction Simulation</h4>
+            <div class="toggle-container">
+              <label class="toggle-switch">
+                <input type="checkbox" id="simulationToggle">
+                <span class="toggle-slider"></span>
+              </label>
+              <span class="toggle-label">Enable simulation before swap</span>
+            </div>
+            <div class="toggle-description">
+              It is not recommended to turn this off.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Modal -->
+    <div id="notificationModal" class="notification-modal">
+      <div class="notification-modal-content">
+        <div class="notification-header">
+          <h2>Transaction History</h2>
+          <button id="closeNotification" class="close-notification">&times;</button>
+        </div>
+        <div class="notification-body">
+          <div id="transactionList">
+            <div class="no-transactions">
+              <p>No transactions yet</p>
+            </div>
+          </div>
+          <button id="clearNotifications" class="clear-notifications" style="display: none;">Clear All</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- You pay section -->
+    <div class="swap-field">
+      <label>You pay</label>
+      <div class="token-amount-row">
+        <div class="token-select" id="fromTokenSelect">
+          <img id="fromTokenLogo" src="https://monbridgedex.xyz/pngtree-orange-round-faq-icon-for-help-and-questions-vector-png-image_48543232-removebg-preview.png" alt="Token Logo" />
+          <span id="fromTokenSymbol">Select Token</span>
+          <svg class="dropdown-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+        <input type="number" id="fromAmount" placeholder="0.00" />
+      </div>
+      <div class="token-balance">
+        <div>Balance: <span id="fromBalance">-</span></div>
+        <div class="max-button" id="maxText">MAX</div>
+      </div>
+      <div class="scrollable-tokens" id="fromTokenList"></div>
+    </div>
+
+    <!-- Switch button -->
+    <div class="switch-btn-container">
+      <div class="switch-btn" id="switchPair">
+
+      </div>
+    </div>
+
+    <!-- You receive section -->
+    <div class="swap-field">
+      <label>You receive</label>
+      <div class="token-amount-row">
+        <div class="token-select" id="toTokenSelect">
+          <img id="toTokenLogo" src="https://monbridgedex.xyz/pngtree-orange-round-faq-icon-for-help-and-questions-vector-png-image_48543232-removebg-preview.png" alt="Token Logo" />
+          <span id="toTokenSymbol">Select Token</span>
+          <svg class="dropdown-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+        </div>
+        <div class="output-amount">
+          <span id="estimatedOutput">0.00</span>
+        </div>
+      </div>
+      <div class="token-balance">
+        <div>Balance: <span id="toBalance">-</span></div>
+      </div>
+      <div class="scrollable-tokens" id="toTokenList"></div>
+    </div>
+
+    <button id="swapButton" class="swap-button">Connect Wallet</button>
+
+    <!-- Collapsible info box -->
+    <div class="collapsible-container">
+      <div class="collapsible-header" id="infoBoxToggle">
+        <span>Swap Details</span>
+        <svg class="collapsible-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+      </div>
+      <div class="collapsible-content" id="infoBoxContent">
+        <div class="info-row">
+          <span>Estimated Output in USD:</span>
+          <span id="estimatedOutputUsd">-</span>
+        </div>
+        <div class="info-row">
+          <span>Input Value in USD:</span>
+          <span id="inputUsdValue">-</span>
+        </div>
+        <div class="info-row">
+          <span>Best Router:</span>
+          <span id="bestRouter">-</span>
+        </div>
+        <div class="info-row">
+          <span>Price Impact:</span>
+          <span id="priceImpact">-</span>
+        </div>
+        <div class="info-row">
+          <span>Aggregator Fee (0.1%):</span>
+          <span id="aggFee">-</span>
+        </div>
+        <div class="info-row unit-price">
+          <span id="inputTokenPriceLabel">-</span>
+        </div>
+        <div class="info-row unit-price">
+          <span id="outputTokenPriceLabel">-</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div id="notifications"></div>
+
+<!-- Confirmation Modal -->
+<div id="confirmationModalOverlay" class="modal-overlay" style="display: none;">
+  <div id="confirmationModal" class="modal-container">
+    <p>Warning: The price impact is over 15%. Type 'confirm' to proceed with the swap.</p>
+    <input type="text" id="confirmationInput" placeholder="Type 'confirm'" />
+    <div class="modal-actions">
+      <button id="confirmSwapBtn">Confirm</button>
+      <button id="cancelSwapBtn">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Constants -->
+<script src="src/constants/tokenlist.js"></script>
+<script src="src/constants/network.js"></script>
+<script src="src/constants/routers.js"></script>
+
+<!-- Contexts -->
+<script src="src/contexts/wallet.js"></script>
+
+<!-- Common Components -->
+<script src="src/components/common/dropdown-nav.js"></script>
+<script src="src/lib/helper.js"></script>
+<script src="src/components/common/token-modal.js"></script>
+
+<!-- Swap Feature Files -->
+<script src="src/features/swap/state/state.js"></script>
+<script src="src/features/swap/utils/utils.js"></script>
+<script src="src/features/swap/services/rateLimiter.js"></script>
+<script src="src/features/swap/services/contracts.js"></script>
+<script src="src/features/swap/services/provider.js"></script>
+<script src="src/features/swap/services/wallet.js"></script>
+<script src="src/features/swap/components/tokenWarning.js"></script>
+<script src="src/features/swap/services/tokens.js"></script>
+<script src="src/features/swap/services/balance.js"></script>
+<script src="src/features/swap/services/price.js"></script>
+<script src="src/features/swap/services/estimation.js"></script>
+<script src="src/features/swap/services/swap.js"></script>
+<script src="src/features/swap/components/settings.js"></script>
+<script src="src/features/swap/services/refresh.js"></script>
+<script src="src/features/swap/components/notifications.js"></script>
+<script src="src/features/swap/components/ui.js"></script>
+<script src="src/features/swap/index.js"></script>
+<script>
+  // Initialize token modals for swap page
+  function initializeSwapTokenModals() {
+    if (typeof initializeTokenModals === 'function') {
+      window.importToken = importToken;
+
+      window.tokenModals = {};
+
+      // Create token modal A
+      window.tokenModals.A = new TokenModal({
+        side: 'A',
+        tokens: [...defaultTokens, ...importedTokens],
+        defaultTokens: defaultTokens.slice(0, 5),
+        onSelectToken: function(token) {
+          fromToken = token;
+          document.getElementById("fromTokenLogo").src = (token.logo && token.logo !== "?")
+            ? token.logo
+            : "https://monbridgedex.xyz/unknown.png";
+          document.getElementById("fromTokenSymbol").innerText = token.symbol;
+          fetchTokenBalance(token, "from");
+          estimateSwap();
+        },
+        balances: {},
+        provider: provider,
+        userAddress: userAddress
+      });
+
+      // Create token modal B
+      window.tokenModals.B = new TokenModal({
+        side: 'B',
+        tokens: [...defaultTokens, ...importedTokens],
+        defaultTokens: defaultTokens.slice(0, 5),
+        onSelectToken: function(token) {
+          toToken = token;
+          document.getElementById("toTokenLogo").src = (token.logo && token.logo !== "?")
+            ? token.logo
+            : "https://monbridgedex.xyz/unknown.png";
+          document.getElementById("toTokenSymbol").innerText = token.symbol;
+          fetchTokenBalance(token, "to");
+          estimateSwap();
+        },
+        balances: {},
+        provider: provider,
+        userAddress: userAddress
+      });
+
+      // Add click event listeners to token selectors
+      const fromTokenSelect = document.getElementById("fromTokenSelect");
+      const toTokenSelect = document.getElementById("toTokenSelect");
+
+      if (fromTokenSelect) {
+        fromTokenSelect.removeEventListener('click', window.openTokenModalA);
+        window.openTokenModalA = function() {
+          // Update provider and userAddress before opening
+          if (window.walletManager) {
+            window.tokenModals.A.provider = window.walletManager.getProvider();
+            window.tokenModals.A.userAddress = window.walletManager.userAddress;
+          }
+          window.tokenModals.A.open();
+        };
+        fromTokenSelect.addEventListener('click', window.openTokenModalA);
+      }
+
+      if (toTokenSelect) {
+        toTokenSelect.removeEventListener('click', window.openTokenModalB);
+        window.openTokenModalB = function() {
+          // Update provider and userAddress before opening
+          if (window.walletManager) {
+            window.tokenModals.B.provider = window.walletManager.getProvider();
+            window.tokenModals.B.userAddress = window.walletManager.userAddress;
+          }
+          window.tokenModals.B.open();
+        };
+        toTokenSelect.addEventListener('click', window.openTokenModalB);
+      }
+    }
+  }
+
+  // Function to update token modals when wallet connects/disconnects
+  function updateSwapTokenModals() {
+    if (window.tokenModals) {
+      const currentProvider = window.walletManager ? window.walletManager.getProvider() : provider;
+      const currentUserAddress = window.walletManager ? window.walletManager.userAddress : userAddress;
+      
+      if (window.tokenModals.A) {
+        window.tokenModals.A.provider = currentProvider;
+        window.tokenModals.A.userAddress = currentUserAddress;
+      }
+      if (window.tokenModals.B) {
+        window.tokenModals.B.provider = currentProvider;
+        window.tokenModals.B.userAddress = currentUserAddress;
+      }
+    }
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    // Initialize token modals after wallet integration is set up
+    setTimeout(() => {
+      initializeSwapTokenModals();
+      
+      // Update modals when wallet connects/disconnects
+      if (window.walletManager) {
+        const originalConnect = window.walletManager.onConnect;
+        const originalDisconnect = window.walletManager.onDisconnect;
+        
+        // Add callback for wallet connection
+        window.walletManager.onConnect(function(address, walletProvider, walletSigner) {
+          updateSwapTokenModals();
+        });
+        
+        // Add callback for wallet disconnection
+        window.walletManager.onDisconnect(function() {
+          updateSwapTokenModals();
+        });
+      }
+    }, 500);
+  });
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Mon Bridge Dex",
+  "url": "https://monbridgedex.xyz",
+  "description": "Mon Bridge Dex is an advanced DEX aggregator that bridges multiple decentralized exchanges to provide the best swap rates on Monad.",
+  "image": "https://monbridgedex.xyz/card.png",
+  "author": {
+    "@type": "Person",
+    "name": "MonBridgeDex",
+    "url": "https://x.com/monbridgedex"
+  }
+}
+</script>
+  <script>
+    window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+  </script>
+  <script defer src="/_vercel/insights/script.js"></script>
+</body>
+</html>

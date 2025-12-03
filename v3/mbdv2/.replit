@@ -1,13 +1,9 @@
-run = "cowsay Configure me!"
-entrypoint = "README.md"
-modules = ["nodejs-20"]
-
-[nix]
-channel = "stable-24_11"
-packages = ["cowsay"]
-
+modules = ["nodejs-20", "web"]
 [agent]
 expertMode = true
+
+[nix]
+channel = "stable-25_05"
 
 [workflows]
 runButton = "Project"
@@ -19,15 +15,15 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Mon Bridge DEX"
+args = "Mon Bridge Dex"
 
 [[workflows.workflow]]
-name = "Mon Bridge DEX"
+name = "Mon Bridge Dex"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd v3/mbdv2 && npx serve -l 5000"
+args = "npx serve -l 5000 --no-request-logging"
 waitForPort = 5000
 
 [workflows.workflow.metadata]
@@ -38,5 +34,5 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 39989
+localPort = 39297
 externalPort = 3000

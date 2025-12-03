@@ -4,7 +4,7 @@ modules = ["nodejs-20"]
 
 [nix]
 channel = "stable-24_11"
-packages = ["cowsay"]
+packages = ["cowsay", "python312Packages.ray"]
 
 [agent]
 expertMode = true
@@ -19,15 +19,15 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "workflow.run"
-args = "Mon Bridge DEX"
+args = "Start application"
 
 [[workflows.workflow]]
-name = "Mon Bridge DEX"
+name = "Start application"
 author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "cd v3/mbdv2 && npx serve -l 5000"
+args = "cd mbdv2 && npx serve -l 5000"
 waitForPort = 5000
 
 [workflows.workflow.metadata]
@@ -38,5 +38,5 @@ localPort = 5000
 externalPort = 80
 
 [[ports]]
-localPort = 39989
+localPort = 37651
 externalPort = 3000
