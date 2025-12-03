@@ -534,7 +534,7 @@ header {
   border: 1px solid rgba(99, 102, 241, 0.1);
   border-radius: 16px;
   padding: 18px;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   position: relative;
   transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -651,10 +651,10 @@ header {
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: -8px 0;
+  margin: -10px 0;
   position: relative;
   z-index: 2;
-  height: 16px;
+  height: 20px;
 }
 
 .switch-btn {
