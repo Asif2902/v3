@@ -89,7 +89,7 @@
   <!-- Add LP Notification Modal -->
   <div id="addLpNotificationModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 2000; backdrop-filter: blur(5px);">
     <div style="position: relative; background-color: #1a1a1a; width: 90%; max-width: 500px; max-height: 80vh; margin: 50px auto; padding: 25px; border-radius: 16px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); color: #fff; overflow: hidden; display: flex; flex-direction: column;">
-      
+
       <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
         <h3 style="margin: 0; color: #6366f1;">Transaction History</h3>
         <span id="closeAddLpNotification" style="font-size: 28px; color: #94a3b8; cursor: pointer; line-height: 1;">&times;</span>
@@ -201,6 +201,8 @@
 <script src="src/lib/formatters.js"></script>
 <script src="src/services/notifications.js"></script>
 <script src="src/services/contracts.js"></script>
+<script src="src/features/swap/services/dexscreener.js"></script>
+<script src="src/lib/helper.js"></script>
 
 <!-- Common Components -->
 <script src="src/components/common/token-modal.js"></script>
@@ -245,7 +247,7 @@
           provider: window.lpState ? window.lpState.provider : null,
           userAddress: window.lpState ? window.lpState.userAddress : null
         });
-        
+
         console.log('Token modals initialized successfully');
       } else {
         console.error('Required functions not available:', {
@@ -331,7 +333,7 @@
   </div>
 </div>
 
-  
+
 
   <div class="mobile-footer">
     <nav class="mobile-footer-nav">

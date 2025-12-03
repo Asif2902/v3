@@ -357,8 +357,9 @@ best swap rates, DEX bridge, crypto trading, Monad Dex aggregator">
 <script src="src/features/swap/state/state.js"></script>
 <script src="src/features/swap/utils/utils.js"></script>
 <script src="src/features/swap/services/rateLimiter.js"></script>
-<script src="src/features/swap/services/contracts.js"></script>
-<script src="src/features/swap/services/provider.js"></script>
+  <script src="src/features/swap/services/dexscreener.js"></script>
+  <script src="src/features/swap/services/contracts.js"></script>
+  <script src="src/features/swap/services/provider.js"></script>
 <script src="src/features/swap/services/wallet.js"></script>
 <script src="src/features/swap/components/tokenWarning.js"></script>
 <script src="src/features/swap/services/tokens.js"></script>
@@ -454,7 +455,7 @@ best swap rates, DEX bridge, crypto trading, Monad Dex aggregator">
     if (window.tokenModals) {
       const currentProvider = window.walletManager ? window.walletManager.getProvider() : provider;
       const currentUserAddress = window.walletManager ? window.walletManager.userAddress : userAddress;
-      
+
       if (window.tokenModals.A) {
         window.tokenModals.A.provider = currentProvider;
         window.tokenModals.A.userAddress = currentUserAddress;
@@ -470,17 +471,17 @@ best swap rates, DEX bridge, crypto trading, Monad Dex aggregator">
     // Initialize token modals after wallet integration is set up
     setTimeout(() => {
       initializeSwapTokenModals();
-      
+
       // Update modals when wallet connects/disconnects
       if (window.walletManager) {
         const originalConnect = window.walletManager.onConnect;
         const originalDisconnect = window.walletManager.onDisconnect;
-        
+
         // Add callback for wallet connection
         window.walletManager.onConnect(function(address, walletProvider, walletSigner) {
           updateSwapTokenModals();
         });
-        
+
         // Add callback for wallet disconnection
         window.walletManager.onDisconnect(function() {
           updateSwapTokenModals();

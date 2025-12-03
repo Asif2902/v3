@@ -1,3 +1,6 @@
+// Cache for token warning decisions
+const tokenWarningCache = new Map();
+
 function shouldShowTokenWarning(address) {
   const cached = tokenWarningCache[address.toLowerCase()];
   if (!cached) return true;
@@ -73,7 +76,7 @@ function showTokenImportWarning(tokenData) {
 
         <div style="background: #2a1f1f; border: 1px solid #ff6b35; border-radius: 10px; padding: 16px; margin-bottom: 22px;">
           <p style="margin: 0; font-size: 13px; color: #ff9999; line-height: 1.4;">
-            <strong>Warning:</strong> Anyone can create a token with any name, including fake versions of existing tokens. 
+            <strong>Warning:</strong> Anyone can create a token with any name, including fake versions of existing tokens.
             Always verify the token contract address before trading.
           </p>
         </div>

@@ -43,12 +43,26 @@ async function importToken(address, retryCount = 0) {
       return null;
     }
 
+    // Try to fetch logo from DexScreener
+    let logo = "https://monbridgedex.xyz/unknown.png";
+    try {
+      if (typeof getTokenLogo === 'function') {
+        const dexScreenerLogo = await getTokenLogo(address);
+        if (dexScreenerLogo) {
+          logo = dexScreenerLogo;
+          console.log(`Found logo for ${symbol} from DexScreener`);
+        }
+      }
+    } catch (error) {
+      console.warn("Could not fetch logo from DexScreener:", error);
+    }
+
     const newToken = {
       name,
       symbol,
       address,
       decimals,
-      logo: "https://monbridgedex.xyz/unknown.png"
+      logo
     };
 
     if (shouldShowTokenWarning(address)) {

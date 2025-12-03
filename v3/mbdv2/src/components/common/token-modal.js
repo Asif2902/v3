@@ -242,11 +242,12 @@ class TokenModal {
     return item;
   }
 
-  handleSearch(searchTerm) {
+  async handleSearch(searchTerm) {
     this.currentSearch = searchTerm.trim().toLowerCase();
     const commonTokensSection = this.modal.querySelector('.common-tokens');
     const allTokensSection = this.modal.querySelector('.all-tokens');
     const noResultsSection = this.modal.querySelector('.token-modal-no-results');
+    const allTokensList = document.getElementById(`allTokensList-${this.side}`);
 
     // Search through all tokens
     let filteredTokens = this.tokens.filter(token => 
@@ -254,44 +255,112 @@ class TokenModal {
       token.address.toLowerCase().includes(this.currentSearch)
     );
 
-    if (this.currentSearch && this.currentSearch.startsWith('0x') && this.currentSearch.length === 42) {
-      // Show import button for valid address format
-      if (!this.tokens.find(t => t.address.toLowerCase() === this.currentSearch)) {
-        noResultsSection.style.display = 'flex';
-        noResultsSection.querySelector('p').textContent = 'Token not found in list.';
-        noResultsSection.querySelector('.token-modal-import').style.display = 'block';
-      } else {
-        noResultsSection.style.display = 'none';
-      }
-    } else {
-      // Show no results message
-      if (filteredTokens.length === 0 && this.currentSearch) {
-        noResultsSection.style.display = 'flex';
-        noResultsSection.querySelector('p').textContent = 'No results found.';
-        noResultsSection.querySelector('.token-modal-import').style.display = 'none';
-      } else {
-        noResultsSection.style.display = 'none';
-      }
-    }
-
-    // Update which sections are shown based on search
-    if (this.currentSearch) {
+    // If we have results, show them
+    if (filteredTokens.length > 0) {
       commonTokensSection.style.display = 'none';
       allTokensSection.style.display = 'block';
+      noResultsSection.style.display = 'none';
 
-      const allTokensList = document.getElementById(`allTokensList-${this.side}`);
       allTokensList.innerHTML = '';
-
       for (const token of filteredTokens) {
         const tokenElement = this.createTokenElement(token);
         allTokensList.appendChild(tokenElement);
       }
+      return;
+    }
+
+    // No local results - try DexScreener search
+    if (this.currentSearch && this.currentSearch.length >= 2) {
+      commonTokensSection.style.display = 'none';
+      allTokensSection.style.display = 'block';
+      
+      // Show loading state
+      allTokensList.innerHTML = '<div class="token-modal-loading"><div class="token-modal-spinner"></div><p>Searching DexScreener...</p></div>';
+      noResultsSection.style.display = 'none';
+
+      try {
+        // Search on DexScreener
+        if (typeof searchTokenOnDexScreener === 'function') {
+          const dexScreenerResult = await searchTokenOnDexScreener(this.currentSearch);
+          
+          if (dexScreenerResult) {
+            // Show the DexScreener result
+            allTokensList.innerHTML = '';
+            const resultElement = this.createDexScreenerResultElement(dexScreenerResult);
+            allTokensList.appendChild(resultElement);
+            noResultsSection.style.display = 'none';
+            return;
+          }
+        }
+      } catch (error) {
+        console.error('DexScreener search error:', error);
+      }
+    }
+
+    // No results anywhere
+    allTokensList.innerHTML = '';
+    
+    if (this.currentSearch && this.currentSearch.startsWith('0x') && this.currentSearch.length === 42) {
+      // Valid address format - show import button
+      noResultsSection.style.display = 'flex';
+      noResultsSection.querySelector('p').textContent = 'Token not found. Import from blockchain?';
+      noResultsSection.querySelector('.token-modal-import').style.display = 'block';
+    } else if (this.currentSearch) {
+      noResultsSection.style.display = 'flex';
+      noResultsSection.querySelector('p').textContent = 'No results found on Monad chain.';
+      noResultsSection.querySelector('.token-modal-import').style.display = 'none';
     } else {
       // Reset to default view
       commonTokensSection.style.display = 'block';
       allTokensSection.style.display = 'block';
+      noResultsSection.style.display = 'none';
       this.renderTokens();
     }
+  }
+
+  createDexScreenerResultElement(tokenInfo) {
+    const item = document.createElement('div');
+    item.className = 'token-modal-item dexscreener-result';
+    
+    const liquidityText = tokenInfo.liquidity 
+      ? `$${(tokenInfo.liquidity / 1000).toFixed(1)}k` 
+      : 'Unknown';
+
+    item.innerHTML = `
+      <img src="${tokenInfo.logo || 'https://monbridgedex.xyz/unknown.png'}" 
+           class="token-modal-item-img" alt="${tokenInfo.symbol}">
+      <div class="token-modal-item-info">
+        <div class="token-modal-item-symbol">${tokenInfo.symbol}</div>
+        <div class="token-modal-item-name">${tokenInfo.name || 'From DexScreener'}</div>
+      </div>
+      <div class="token-modal-item-balance">
+        <div style="font-size: 12px; color: var(--text-muted);">Liquidity: ${liquidityText}</div>
+        <button class="token-modal-import-btn" style="margin-top: 4px; padding: 4px 12px; font-size: 12px;">Import</button>
+      </div>
+    `;
+
+    const importBtn = item.querySelector('.token-modal-import-btn');
+    importBtn.addEventListener('click', async (e) => {
+      e.stopPropagation();
+      importBtn.textContent = 'Importing...';
+      importBtn.disabled = true;
+
+      if (typeof window.importToken === 'function') {
+        const importedToken = await window.importToken(tokenInfo.address);
+        if (importedToken) {
+          this.tokens.push(importedToken);
+          this.selectToken(importedToken);
+        } else {
+          importBtn.textContent = 'Failed';
+          setTimeout(() => {
+            importBtn.textContent = 'Import';
+            importBtn.disabled = false;
+          }, 2000);
+        }
+      }
+    });
+
+    return item;
   }
 
   async handleImportToken() {

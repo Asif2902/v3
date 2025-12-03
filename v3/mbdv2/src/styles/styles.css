@@ -2913,6 +2913,38 @@ div#fromTokenList::-webkit-scrollbar {
   background: rgba(99, 102, 241, 0.15);
 }
 
+.token-modal-import-btn {
+  padding: 6px 12px;
+  background: rgba(99, 102, 241, 0.1);
+  color: var(--primary-color);
+  border: 1px solid rgba(99, 102, 241, 0.3);
+  border-radius: 6px;
+  font-weight: 500;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.token-modal-import-btn:hover:not(:disabled) {
+  background: rgba(99, 102, 241, 0.2);
+  border-color: rgba(99, 102, 241, 0.5);
+}
+
+.token-modal-import-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.dexscreener-result {
+  border-left: 3px solid rgba(99, 102, 241, 0.5);
+  background: rgba(99, 102, 241, 0.05);
+}
+
+.token-modal-loading p {
+  margin-top: 10px;
+  font-size: 14px;
+}
+
 .token-modal-loading {
   display: flex;
   justify-content: center;
