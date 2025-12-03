@@ -1,11 +1,7 @@
 document.getElementById("switchPair").addEventListener("click", () => {
-  const currentOutput = document.getElementById("estimatedOutput").innerText;
-  const outputValue = parseFloat(currentOutput);
-  
   const temp = fromToken;
   fromToken = toToken;
   toToken = temp;
-  
   document.getElementById("fromTokenLogo").src = (fromToken.logo && fromToken.logo !== "?")
     ? fromToken.logo
     : "https://monbridgedex.xyz/unknown.png";
@@ -14,11 +10,6 @@ document.getElementById("switchPair").addEventListener("click", () => {
     ? toToken.logo
     : "https://monbridgedex.xyz/unknown.png";
   document.getElementById("toTokenSymbol").innerText = toToken.symbol;
-  
-  if (!isNaN(outputValue) && outputValue > 0) {
-    document.getElementById("fromAmount").value = outputValue.toString();
-  }
-  
   fetchTokenBalance(fromToken, "from");
   fetchTokenBalance(toToken, "to");
   estimateSwap();
