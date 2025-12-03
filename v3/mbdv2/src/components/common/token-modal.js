@@ -17,6 +17,7 @@ class TokenModal {
     this.balances = options.balances || {};
     this.provider = options.provider;
     this.userAddress = options.userAddress;
+    this.searchDebounceTimer = null;
 
     this.initialize();
   }
@@ -172,6 +173,12 @@ class TokenModal {
     document.body.style.position = '';
     document.body.style.width = '';
 
+    // Clear any pending search
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+      this.searchDebounceTimer = null;
+    }
+
     // Remove viewport resize handler
     if (this.handleViewportResize) {
       window.removeEventListener('resize', this.handleViewportResize);
@@ -249,13 +256,18 @@ class TokenModal {
     const noResultsSection = this.modal.querySelector('.token-modal-no-results');
     const allTokensList = document.getElementById(`allTokensList-${this.side}`);
 
-    // Search through all tokens
+    // Clear any existing debounce timer
+    if (this.searchDebounceTimer) {
+      clearTimeout(this.searchDebounceTimer);
+    }
+
+    // Search through all tokens (local search is instant)
     let filteredTokens = this.tokens.filter(token => 
       token.symbol.toLowerCase().includes(this.currentSearch) || 
       token.address.toLowerCase().includes(this.currentSearch)
     );
 
-    // If we have results, show them
+    // If we have local results, show them immediately
     if (filteredTokens.length > 0) {
       commonTokensSection.style.display = 'none';
       allTokensSection.style.display = 'block';
@@ -269,35 +281,57 @@ class TokenModal {
       return;
     }
 
-    // No local results - try DexScreener search
+    // No local results - show loading and debounce DexScreener search
     if (this.currentSearch && this.currentSearch.length >= 2) {
       commonTokensSection.style.display = 'none';
       allTokensSection.style.display = 'block';
       
-      // Show loading state
+      // Show loading state immediately
       allTokensList.innerHTML = '<div class="token-modal-loading"><div class="token-modal-spinner"></div><p>Searching DexScreener...</p></div>';
       noResultsSection.style.display = 'none';
 
-      try {
-        // Search on DexScreener
-        if (typeof searchTokenOnDexScreener === 'function') {
-          const dexScreenerResult = await searchTokenOnDexScreener(this.currentSearch);
-          
-          if (dexScreenerResult) {
-            // Show the DexScreener result
-            allTokensList.innerHTML = '';
-            const resultElement = this.createDexScreenerResultElement(dexScreenerResult);
-            allTokensList.appendChild(resultElement);
-            noResultsSection.style.display = 'none';
-            return;
+      // Debounce the actual API call by 500ms
+      this.searchDebounceTimer = setTimeout(async () => {
+        try {
+          // Search on DexScreener
+          if (typeof searchTokenOnDexScreener === 'function') {
+            const dexScreenerResult = await searchTokenOnDexScreener(this.currentSearch);
+            
+            if (dexScreenerResult) {
+              // Show the DexScreener result
+              allTokensList.innerHTML = '';
+              const resultElement = this.createDexScreenerResultElement(dexScreenerResult);
+              allTokensList.appendChild(resultElement);
+              noResultsSection.style.display = 'none';
+              return;
+            }
           }
+          
+          // If no results from DexScreener, show no results message
+          this.showNoResults(allTokensList, noResultsSection);
+        } catch (error) {
+          console.error('DexScreener search error:', error);
+          this.showNoResults(allTokensList, noResultsSection);
         }
-      } catch (error) {
-        console.error('DexScreener search error:', error);
-      }
+      }, 500);
+      
+      return;
     }
 
-    // No results anywhere
+    // Empty search or too short
+    if (!this.currentSearch) {
+      // Reset to default view
+      commonTokensSection.style.display = 'block';
+      allTokensSection.style.display = 'block';
+      noResultsSection.style.display = 'none';
+      this.renderTokens();
+    } else {
+      // Search term too short
+      this.showNoResults(allTokensList, noResultsSection);
+    }
+  }
+
+  showNoResults(allTokensList, noResultsSection) {
     allTokensList.innerHTML = '';
     
     if (this.currentSearch && this.currentSearch.startsWith('0x') && this.currentSearch.length === 42) {
@@ -309,12 +343,6 @@ class TokenModal {
       noResultsSection.style.display = 'flex';
       noResultsSection.querySelector('p').textContent = 'No results found on Monad chain.';
       noResultsSection.querySelector('.token-modal-import').style.display = 'none';
-    } else {
-      // Reset to default view
-      commonTokensSection.style.display = 'block';
-      allTokensSection.style.display = 'block';
-      noResultsSection.style.display = 'none';
-      this.renderTokens();
     }
   }
 

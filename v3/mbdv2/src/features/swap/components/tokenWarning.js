@@ -1,5 +1,10 @@
-// Cache for token warning decisions
-const tokenWarningCache = new Map();
+// Token Warning Modal Component
+// Shows warnings when importing unknown or potentially risky tokens
+
+if (typeof window.tokenWarningCache === 'undefined') {
+  window.tokenWarningCache = new Map();
+}
+const tokenWarningCache = window.tokenWarningCache;
 
 function shouldShowTokenWarning(address) {
   const cached = tokenWarningCache[address.toLowerCase()];
@@ -18,7 +23,7 @@ function hideTokenWarningFor24h(address) {
     timestamp: Date.now(),
     hidden: true
   };
-  localStorage.setItem('tokenWarningCache', JSON.stringify(tokenWarningCache));
+  localStorage.setItem('tokenWarningCache', JSON.stringify(Array.from(tokenWarningCache.entries())));
   console.log('Token warning hidden for 24h:', normalizedAddress, tokenWarningCache[normalizedAddress]);
 }
 
