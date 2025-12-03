@@ -1,11 +1,3 @@
-// Token Warning Modal Component
-// Shows warnings when importing unknown or potentially risky tokens
-
-if (typeof window.tokenWarningCache === 'undefined') {
-  window.tokenWarningCache = new Map();
-}
-const tokenWarningCache = window.tokenWarningCache;
-
 function shouldShowTokenWarning(address) {
   const cached = tokenWarningCache[address.toLowerCase()];
   if (!cached) return true;
@@ -18,13 +10,11 @@ function shouldShowTokenWarning(address) {
 }
 
 function hideTokenWarningFor24h(address) {
-  const normalizedAddress = address.toLowerCase();
-  tokenWarningCache[normalizedAddress] = {
+  tokenWarningCache[address.toLowerCase()] = {
     timestamp: Date.now(),
     hidden: true
   };
-  localStorage.setItem('tokenWarningCache', JSON.stringify(Array.from(tokenWarningCache.entries())));
-  console.log('Token warning hidden for 24h:', normalizedAddress, tokenWarningCache[normalizedAddress]);
+  localStorage.setItem('tokenWarningCache', JSON.stringify(tokenWarningCache));
 }
 
 function showTokenImportWarning(tokenData) {
@@ -81,7 +71,7 @@ function showTokenImportWarning(tokenData) {
 
         <div style="background: #2a1f1f; border: 1px solid #ff6b35; border-radius: 10px; padding: 16px; margin-bottom: 22px;">
           <p style="margin: 0; font-size: 13px; color: #ff9999; line-height: 1.4;">
-            <strong>Warning:</strong> Anyone can create a token with any name, including fake versions of existing tokens.
+            <strong>Warning:</strong> Anyone can create a token with any name, including fake versions of existing tokens. 
             Always verify the token contract address before trading.
           </p>
         </div>
