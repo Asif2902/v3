@@ -1,15 +1,3 @@
-// Initialize cache from localStorage
-let tokenWarningCache = {};
-try {
-  const storedCache = localStorage.getItem('tokenWarningCache');
-  if (storedCache) {
-    tokenWarningCache = JSON.parse(storedCache);
-  }
-} catch (error) {
-  console.error('Error loading token warning cache:', error);
-  tokenWarningCache = {};
-}
-
 function shouldShowTokenWarning(address) {
   const cached = tokenWarningCache[address.toLowerCase()];
   if (!cached) return true;
