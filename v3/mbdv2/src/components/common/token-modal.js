@@ -236,7 +236,7 @@ class TokenModal {
 
     // Check if token is a default token
     const isDefaultToken = this.defaultTokens.some(t => t.address.toLowerCase() === token.address.toLowerCase());
-    const badgeHtml = isDefaultToken ? '<span class="token-verified-badge" title="Verified Token">✓</span>' : '';
+    const badgeHtml = isDefaultToken ? '<span class="token-verified-badge"></span>' : '';
 
     item.innerHTML = `
       <img src="${logoUrl}" 
@@ -262,10 +262,10 @@ class TokenModal {
     if (!text || !query) return false;
     const textLower = text.toLowerCase();
     const queryLower = query.toLowerCase();
-    
+
     // First check exact substring match
     if (textLower.includes(queryLower)) return true;
-    
+
     // Then fuzzy match - all query chars must appear in order
     let queryIndex = 0;
     for (let i = 0; i < textLower.length && queryIndex < queryLower.length; i++) {
@@ -326,19 +326,19 @@ class TokenModal {
           // Search on DexScreener - now returns array of tokens
           if (typeof searchTokenOnDexScreener === 'function') {
             const dexScreenerResults = await searchTokenOnDexScreener(this.currentSearch);
-            
+
             if (dexScreenerResults && dexScreenerResults.length > 0) {
               // Filter out tokens that are already in local list (by address)
               const newTokens = dexScreenerResults.filter(result => 
                 !this.tokens.some(t => t.address.toLowerCase() === result.address.toLowerCase())
               );
-              
+
               if (newTokens.length > 0) {
                 // Clear loading state if no local results were shown
                 if (filteredTokens.length === 0) {
                   allTokensList.innerHTML = '';
                 }
-                
+
                 // Add all new DexScreener results to the list
                 for (const tokenInfo of newTokens) {
                   const resultElement = this.createDexScreenerResultElement(tokenInfo);
@@ -349,7 +349,7 @@ class TokenModal {
               }
             }
           }
-          
+
           // If no new results from DexScreener and no local results, show no results message
           if (filteredTokens.length === 0) {
             this.showNoResults(allTokensList, noResultsSection);
@@ -361,7 +361,7 @@ class TokenModal {
           }
         }
       }, 500);
-      
+
       return;
     }
 
@@ -380,7 +380,7 @@ class TokenModal {
 
   showNoResults(allTokensList, noResultsSection) {
     allTokensList.innerHTML = '';
-    
+
     if (this.currentSearch && this.currentSearch.startsWith('0x') && this.currentSearch.length === 42) {
       // Valid address format - show import button
       noResultsSection.style.display = 'flex';
@@ -396,7 +396,7 @@ class TokenModal {
   createDexScreenerResultElement(tokenInfo) {
     const item = document.createElement('div');
     item.className = 'token-modal-item dexscreener-result';
-    
+
     const liquidityText = tokenInfo.liquidity 
       ? `$${(tokenInfo.liquidity / 1000).toFixed(1)}k` 
       : 'Unknown';
@@ -405,7 +405,7 @@ class TokenModal {
 
     // Check if token is a default token
     const isDefaultToken = this.defaultTokens.some(t => t.address.toLowerCase() === tokenInfo.address.toLowerCase());
-    const badgeHtml = isDefaultToken ? '<span class="token-verified-badge" title="Verified Token">✓</span>' : '';
+    const badgeHtml = isDefaultToken ? '<span class="token-verified-badge"></span>' : '';
 
     item.innerHTML = `
       <img src="${logoUrl}" 
