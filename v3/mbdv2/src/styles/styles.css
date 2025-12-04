@@ -2870,8 +2870,8 @@ div#fromTokenList::-webkit-scrollbar {
 
 .token-verified-badge {
   display: inline-block;
-  width: 16px;
-  height: 16px;
+  width: 20px;
+  height: 20px;
   background-image: url('https://monbridgedex.xyz/verified.png');
   background-size: contain;
   background-repeat: no-repeat;
