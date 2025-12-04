@@ -267,7 +267,7 @@ class TokenModal {
       token.address.toLowerCase().includes(this.currentSearch)
     );
 
-    // If we have local results, show them immediately
+    // Show local results immediately
     if (filteredTokens.length > 0) {
       commonTokensSection.style.display = 'none';
       allTokensSection.style.display = 'block';
@@ -278,17 +278,18 @@ class TokenModal {
         const tokenElement = this.createTokenElement(token);
         allTokensList.appendChild(tokenElement);
       }
-      return;
     }
 
-    // No local results - show loading and debounce DexScreener search
+    // Always search API for additional tokens (if search term is long enough)
+    // This allows finding tokens with same ticker but different addresses
     if (this.currentSearch && this.currentSearch.length >= 2) {
-      commonTokensSection.style.display = 'none';
-      allTokensSection.style.display = 'block';
-      
-      // Show loading state immediately
-      allTokensList.innerHTML = '<div class="token-modal-loading"><div class="token-modal-spinner"></div><p>Searching DexScreener...</p></div>';
-      noResultsSection.style.display = 'none';
+      if (filteredTokens.length === 0) {
+        commonTokensSection.style.display = 'none';
+        allTokensSection.style.display = 'block';
+        // Show loading state only if no local results
+        allTokensList.innerHTML = '<div class="token-modal-loading"><div class="token-modal-spinner"></div><p>Searching DexScreener...</p></div>';
+        noResultsSection.style.display = 'none';
+      }
 
       // Debounce the actual API call by 500ms
       this.searchDebounceTimer = setTimeout(async () => {
@@ -298,20 +299,33 @@ class TokenModal {
             const dexScreenerResult = await searchTokenOnDexScreener(this.currentSearch);
             
             if (dexScreenerResult) {
-              // Show the DexScreener result
-              allTokensList.innerHTML = '';
-              const resultElement = this.createDexScreenerResultElement(dexScreenerResult);
-              allTokensList.appendChild(resultElement);
-              noResultsSection.style.display = 'none';
-              return;
+              // Check if this token is already in local list (by address)
+              const alreadyExists = this.tokens.some(t => 
+                t.address.toLowerCase() === dexScreenerResult.address.toLowerCase()
+              );
+              
+              if (!alreadyExists) {
+                // Add DexScreener result to the list
+                if (filteredTokens.length === 0) {
+                  allTokensList.innerHTML = '';
+                }
+                const resultElement = this.createDexScreenerResultElement(dexScreenerResult);
+                allTokensList.appendChild(resultElement);
+                noResultsSection.style.display = 'none';
+                return;
+              }
             }
           }
           
-          // If no results from DexScreener, show no results message
-          this.showNoResults(allTokensList, noResultsSection);
+          // If no new results from DexScreener and no local results, show no results message
+          if (filteredTokens.length === 0) {
+            this.showNoResults(allTokensList, noResultsSection);
+          }
         } catch (error) {
           console.error('DexScreener search error:', error);
-          this.showNoResults(allTokensList, noResultsSection);
+          if (filteredTokens.length === 0) {
+            this.showNoResults(allTokensList, noResultsSection);
+          }
         }
       }, 500);
       
@@ -325,8 +339,8 @@ class TokenModal {
       allTokensSection.style.display = 'block';
       noResultsSection.style.display = 'none';
       this.renderTokens();
-    } else {
-      // Search term too short
+    } else if (filteredTokens.length === 0) {
+      // Search term too short and no local results
       this.showNoResults(allTokensList, noResultsSection);
     }
   }
@@ -376,7 +390,8 @@ class TokenModal {
       if (typeof window.importToken === 'function') {
         const importedToken = await window.importToken(tokenInfo.address);
         if (importedToken) {
-          this.tokens.push(importedToken);
+          // Don't push here - importToken already updates token modals
+          // Just select the token
           this.selectToken(importedToken);
         } else {
           importBtn.textContent = 'Failed';
@@ -408,8 +423,8 @@ class TokenModal {
       if (typeof window.importToken === 'function') {
         const importedToken = await window.importToken(this.currentSearch);
         if (importedToken) {
-          // Add to the tokens list and update
-          this.tokens.push(importedToken);
+          // Don't push here - importToken already updates token modals
+          // Just select the token
           this.selectToken(importedToken);
         }
       } else {

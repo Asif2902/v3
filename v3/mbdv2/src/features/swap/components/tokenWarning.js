@@ -1,20 +1,6 @@
 function shouldShowTokenWarning(address) {
-  const cached = tokenWarningCache[address.toLowerCase()];
-  if (!cached) return true;
-
-  const now = Date.now();
-  const cacheTime = cached.timestamp;
-  const twentyFourHours = 24 * 60 * 60 * 1000;
-
-  return (now - cacheTime) > twentyFourHours;
-}
-
-function hideTokenWarningFor24h(address) {
-  tokenWarningCache[address.toLowerCase()] = {
-    timestamp: Date.now(),
-    hidden: true
-  };
-  localStorage.setItem('tokenWarningCache', JSON.stringify(tokenWarningCache));
+  // Always show warning for user protection - no 24h caching
+  return true;
 }
 
 function showTokenImportWarning(tokenData) {
@@ -76,13 +62,6 @@ function showTokenImportWarning(tokenData) {
           </p>
         </div>
 
-        <div style="display: flex; align-items: center; margin-bottom: 22px; gap: 10px;">
-          <input type="checkbox" id="dontShowAgainCheckbox" style="margin: 0; width: 16px; height: 16px;">
-          <label for="dontShowAgainCheckbox" style="font-size: 13px; color: #ccc; cursor: pointer; line-height: 1.3;">
-            Don't show this warning for 24 hours
-          </label>
-        </div>
-
         <div style="display: flex; gap: 14px;">
           <button id="cancelTokenImport" style="flex: 1; padding: 14px 16px; background: transparent; border: 1px solid #666; border-radius: 10px; color: white; cursor: pointer; font-size: 14px; font-weight: 500; transition: all 0.2s;">
             Cancel
@@ -115,7 +94,6 @@ function showTokenImportWarning(tokenData) {
 
     const confirmButton = document.getElementById("confirmTokenImport");
     const cancelButton = document.getElementById("cancelTokenImport");
-    const dontShowCheckbox = document.getElementById("dontShowAgainCheckbox");
 
     const newConfirmButton = confirmButton.cloneNode(true);
     const newCancelButton = cancelButton.cloneNode(true);
@@ -124,9 +102,6 @@ function showTokenImportWarning(tokenData) {
     cancelButton.parentNode.replaceChild(newCancelButton, cancelButton);
 
     newConfirmButton.addEventListener("click", () => {
-      if (dontShowCheckbox.checked) {
-        hideTokenWarningFor24h(tokenData.address);
-      }
       modalOverlay.style.display = "none";
       resolve(true);
     });
