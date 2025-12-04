@@ -236,7 +236,7 @@ class TokenModal {
 
     // Check if token is a default token
     const isDefaultToken = this.defaultTokens.some(t => t.address.toLowerCase() === token.address.toLowerCase());
-    const badgeHtml = isDefaultToken ? '<span class="token-verified-badge"></span>' : '';
+    const badgeHtml = isDefaultToken ? '<span class="token-verified-badge" title="Verified Token"></span>' : '';
 
     item.innerHTML = `
       <img src="${logoUrl}" 

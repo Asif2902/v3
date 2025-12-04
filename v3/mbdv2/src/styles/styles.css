@@ -2869,41 +2869,15 @@ div#fromTokenList::-webkit-scrollbar {
 }
 
 .token-verified-badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  display: inline-block;
   width: 16px;
   height: 16px;
-  background: linear-gradient(135deg, #9333ea, #a855f7);
-  color: white;
-  font-size: 10px;
-  font-weight: bold;
-  box-shadow: 0 2px 4px rgba(147, 51, 234, 0.3);
+  background-image: url('https://monbridgedex.xyz/verified.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
   flex-shrink: 0;
-  position: relative;
-  clip-path: polygon(
-    50% 0%, 55% 2%, 60% 1%, 65% 3%, 70% 2%, 75% 4%, 80% 5%, 83% 8%, 
-    86% 11%, 89% 14%, 91% 18%, 93% 22%, 95% 27%, 96% 32%, 97% 37%, 98% 42%, 
-    98% 47%, 99% 50%, 98% 53%, 98% 58%, 97% 63%, 96% 68%, 95% 73%, 93% 78%, 
-    91% 82%, 89% 86%, 86% 89%, 83% 92%, 80% 95%, 75% 96%, 70% 98%, 65% 97%, 
-    60% 99%, 55% 98%, 50% 100%, 45% 98%, 40% 99%, 35% 97%, 30% 98%, 25% 96%, 
-    20% 95%, 17% 92%, 14% 89%, 11% 86%, 9% 82%, 7% 78%, 5% 73%, 4% 68%, 
-    3% 63%, 2% 58%, 2% 53%, 1% 50%, 2% 47%, 2% 42%, 3% 37%, 4% 32%, 
-    5% 27%, 7% 22%, 9% 18%, 11% 14%, 14% 11%, 17% 8%, 20% 5%, 25% 4%, 
-    30% 2%, 35% 3%, 40% 1%, 45% 2%
-  );
-}
-
-.token-verified-badge::before {
-  content: '';
-  position: absolute;
-  width: 5px;
-  height: 2.5px;
-  border-left: 1.8px solid white;
-  border-bottom: 1.8px solid white;
-  transform: rotate(-45deg);
-  top: calc(50% - 0.5px);
-  left: calc(50% - 0.5px);
+  vertical-align: middle;
 }
 
 .token-modal-item-name {
