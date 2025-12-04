@@ -11,24 +11,25 @@ const tokenProfileCache = new Map();
 const PROFILE_CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 /**
- * Search for a token on DexScreener by address or symbol
+ * Search for tokens on DexScreener by address or symbol
  * @param {string} searchTerm - Token address or symbol
- * @returns {Promise<Object|null>} Token info from DexScreener or null
+ * @returns {Promise<Array>} Array of matching tokens (empty if none found)
  */
 async function searchTokenOnDexScreener(searchTerm) {
   try {
     const cleanTerm = searchTerm.trim();
     
-    // If it's an address, search by token address
+    // If it's an address, search by token address (returns single token wrapped in array)
     if (cleanTerm.startsWith('0x') && cleanTerm.length === 42) {
-      return await searchTokenByAddress(cleanTerm);
+      const result = await searchTokenByAddress(cleanTerm);
+      return result ? [result] : [];
     }
     
-    // Otherwise, search by symbol/name
+    // Otherwise, search by symbol/name (returns array of tokens)
     return await searchTokenByQuery(cleanTerm);
   } catch (error) {
     console.error('DexScreener search error:', error);
-    return null;
+    return [];
   }
 }
 
@@ -92,9 +93,9 @@ async function searchTokenByAddress(address) {
 }
 
 /**
- * Search token by symbol or name
+ * Search token by symbol or name - returns MULTIPLE matching tokens
  * @param {string} query - Search query
- * @returns {Promise<Object|null>}
+ * @returns {Promise<Array>} Array of matching tokens
  */
 async function searchTokenByQuery(query) {
   try {
@@ -106,13 +107,13 @@ async function searchTokenByQuery(query) {
     );
 
     if (!response.ok) {
-      return null;
+      return [];
     }
 
     const data = await response.json();
 
     if (!data.pairs || data.pairs.length === 0) {
-      return null;
+      return [];
     }
 
     // Filter for Monad chain pairs
@@ -121,30 +122,71 @@ async function searchTokenByQuery(query) {
     );
 
     if (monadPairs.length === 0) {
-      return null;
+      return [];
     }
 
-    // Find best match
-    const bestPair = monadPairs.find(pair => 
-      pair.baseToken.symbol.toLowerCase() === query.toLowerCase() ||
-      pair.quoteToken.symbol.toLowerCase() === query.toLowerCase()
-    ) || monadPairs[0];
+    // Extract unique tokens that match the query
+    const tokenMap = new Map();
+    const queryLower = query.toLowerCase();
 
-    const isBaseTokenMatch = bestPair.baseToken.symbol.toLowerCase().includes(query.toLowerCase());
-    const tokenInfo = isBaseTokenMatch ? bestPair.baseToken : bestPair.quoteToken;
+    for (const pair of monadPairs) {
+      // Check base token
+      if (pair.baseToken.symbol.toLowerCase().includes(queryLower) ||
+          pair.baseToken.name?.toLowerCase().includes(queryLower)) {
+        const address = pair.baseToken.address.toLowerCase();
+        if (!tokenMap.has(address)) {
+          tokenMap.set(address, {
+            address: pair.baseToken.address,
+            symbol: pair.baseToken.symbol,
+            name: pair.baseToken.name,
+            logo: pair.info?.imageUrl || null,
+            priceUsd: pair.priceUsd,
+            liquidity: pair.liquidity?.usd || 0,
+            pairAddress: pair.pairAddress
+          });
+        } else {
+          // Update if this pair has higher liquidity
+          const existing = tokenMap.get(address);
+          if ((pair.liquidity?.usd || 0) > existing.liquidity) {
+            existing.liquidity = pair.liquidity?.usd || 0;
+            existing.logo = pair.info?.imageUrl || existing.logo;
+          }
+        }
+      }
 
-    return {
-      address: tokenInfo.address,
-      symbol: tokenInfo.symbol,
-      name: tokenInfo.name,
-      logo: bestPair.info?.imageUrl || null,
-      priceUsd: bestPair.priceUsd,
-      liquidity: bestPair.liquidity?.usd,
-      pairAddress: bestPair.pairAddress
-    };
+      // Check quote token
+      if (pair.quoteToken.symbol.toLowerCase().includes(queryLower) ||
+          pair.quoteToken.name?.toLowerCase().includes(queryLower)) {
+        const address = pair.quoteToken.address.toLowerCase();
+        if (!tokenMap.has(address)) {
+          tokenMap.set(address, {
+            address: pair.quoteToken.address,
+            symbol: pair.quoteToken.symbol,
+            name: pair.quoteToken.name,
+            logo: null, // Quote tokens don't have logo in pair info
+            priceUsd: null,
+            liquidity: pair.liquidity?.usd || 0,
+            pairAddress: pair.pairAddress
+          });
+        } else {
+          // Update if this pair has higher liquidity
+          const existing = tokenMap.get(address);
+          if ((pair.liquidity?.usd || 0) > existing.liquidity) {
+            existing.liquidity = pair.liquidity?.usd || 0;
+          }
+        }
+      }
+    }
+
+    // Convert map to array and sort by liquidity (highest first)
+    const tokens = Array.from(tokenMap.values())
+      .sort((a, b) => (b.liquidity || 0) - (a.liquidity || 0))
+      .slice(0, 10); // Limit to top 10 results
+
+    return tokens;
   } catch (error) {
     console.error('Error searching token by query:', error);
-    return null;
+    return [];
   }
 }
 

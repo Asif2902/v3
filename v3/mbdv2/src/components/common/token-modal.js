@@ -294,23 +294,27 @@ class TokenModal {
       // Debounce the actual API call by 500ms
       this.searchDebounceTimer = setTimeout(async () => {
         try {
-          // Search on DexScreener
+          // Search on DexScreener - now returns array of tokens
           if (typeof searchTokenOnDexScreener === 'function') {
-            const dexScreenerResult = await searchTokenOnDexScreener(this.currentSearch);
+            const dexScreenerResults = await searchTokenOnDexScreener(this.currentSearch);
             
-            if (dexScreenerResult) {
-              // Check if this token is already in local list (by address)
-              const alreadyExists = this.tokens.some(t => 
-                t.address.toLowerCase() === dexScreenerResult.address.toLowerCase()
+            if (dexScreenerResults && dexScreenerResults.length > 0) {
+              // Filter out tokens that are already in local list (by address)
+              const newTokens = dexScreenerResults.filter(result => 
+                !this.tokens.some(t => t.address.toLowerCase() === result.address.toLowerCase())
               );
               
-              if (!alreadyExists) {
-                // Add DexScreener result to the list
+              if (newTokens.length > 0) {
+                // Clear loading state if no local results were shown
                 if (filteredTokens.length === 0) {
                   allTokensList.innerHTML = '';
                 }
-                const resultElement = this.createDexScreenerResultElement(dexScreenerResult);
-                allTokensList.appendChild(resultElement);
+                
+                // Add all new DexScreener results to the list
+                for (const tokenInfo of newTokens) {
+                  const resultElement = this.createDexScreenerResultElement(tokenInfo);
+                  allTokensList.appendChild(resultElement);
+                }
                 noResultsSection.style.display = 'none';
                 return;
               }
