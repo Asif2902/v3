@@ -1409,8 +1409,7 @@ label {
   letter-spacing: 0.3px;
 }
 
-.token-select img,
-.fallback-logo {
+.token-select img {
   width: 28px;
   height: 28px;
   margin-right: 12px;
@@ -1984,41 +1983,6 @@ button:disabled {
   }
 }
 
-.close {
-  color: var(--text-muted);
-  position: absolute;
-  top: 15px;
-  right: 15px;
-  font-size: 28px;
-  font-weight: bold;
-  cursor: pointer;
-  transition: color 0.2s;
-}
-
-.close:hover,
-.close:focus {
-  color: var(--text-color);
-  text-decoration: none;
-}
-
-.dex-link {
-  display: block;
-  margin: 20px 0;
-  font-size: 20px;
-  text-decoration: none;
-  color: var(--primary-color);
-  transition: all 0.2s;
-  padding: 10px;
-  border-radius: 8px;
-  background: rgba(99, 102, 241, 0.1);
-}
-
-.dex-link:hover {
-  text-decoration: none;
-  background: rgba(99, 102, 241, 0.2);
-  transform: translateX(5px);
-}
-
 #confirmationModalOverlay {
   position: fixed;
   top: 0;
@@ -2362,34 +2326,6 @@ button:not(:disabled):active,
 .refresh-button {
   padding: 6px;
   border-radius: 50%;
-}
-
-.skeleton-loader {
-  background: linear-gradient(90deg, rgba(51, 65, 85, 0.2) 25%, rgba(99, 102, 241, 0.15) 50%, rgba(51, 65, 85, 0.2) 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.8s ease-in-out infinite;
-  border-radius: 8px;
-  height: 20px;
-  width: 100%;
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-@keyframes pulse {
-  0% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0.7); }
-  70% { box-shadow: 0 0 0 10px rgba(99, 102, 241, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(99, 102, 241, 0); }
-}
-
-.pulse {
-  animation: pulse 2s infinite;
 }
 
 /* LP Page Notification Containers */
@@ -3084,4 +3020,73 @@ div#fromTokenList::-webkit-scrollbar {
   margin-left: 5px;
   white-space: nowrap;
   flex-shrink: 0;
+}
+
+#priceImpact.low {
+  color: var(--success-color);
+}
+
+#priceImpact.medium {
+  color: var(--warning-color);
+}
+
+#priceImpact.high {
+  color: var(--error-color);
+}
+
+.swap-button.price-impact-low:not(:disabled) {
+  background: linear-gradient(135deg, var(--success-color), #059669);
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+}
+
+.swap-button.price-impact-low:not(:disabled):hover {
+  box-shadow: 0 8px 25px rgba(16, 185, 129, 0.4);
+}
+
+.swap-button.price-impact-medium:not(:disabled) {
+  background: linear-gradient(135deg, var(--warning-color), #d97706);
+  box-shadow: 0 4px 15px rgba(245, 158, 11, 0.3);
+}
+
+.swap-button.price-impact-medium:not(:disabled):hover {
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.4);
+}
+
+.swap-button.price-impact-high:not(:disabled) {
+  background: linear-gradient(135deg, var(--error-color), #dc2626);
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+}
+
+.swap-button.price-impact-high:not(:disabled):hover {
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.4);
+}
+
+.swap-path {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  font-size: 13px;
+  color: var(--text-color);
+}
+
+.swap-path-token {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(99, 102, 241, 0.1);
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.swap-path-token img {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+}
+
+.swap-path-arrow {
+  color: var(--primary-color);
+  font-size: 12px;
 }

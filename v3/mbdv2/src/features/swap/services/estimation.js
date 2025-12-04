@@ -388,8 +388,6 @@ async function updateUIWithResults(result, amountInParsed) {
 
   document.getElementById("estimatedOutput").innerText = estimatedOutput.toFixed(6);
 
-  const isDefaultToken = (token) => defaultTokens.some(dt => dt.address.toLowerCase() === token.address.toLowerCase());
-
   if (result.type === 'multi' && result.swapData) {
     window.currentSwapData = result.swapData;
     window.currentBestSwap = null;
@@ -417,20 +415,6 @@ async function updateUIWithResults(result, amountInParsed) {
     bestRouterElement.appendChild(document.createTextNode(' '));
     bestRouterElement.appendChild(betaTag);
 
-    // Add purple badge for default tokens
-    if (isDefaultToken(fromToken)) {
-      const fromTokenBadge = document.createElement('span');
-      fromTokenBadge.className = 'purple-badge';
-      fromTokenBadge.textContent = 'Default';
-      document.getElementById('fromTokenSymbol').appendChild(fromTokenBadge);
-    }
-    if (isDefaultToken(toToken)) {
-      const toTokenBadge = document.createElement('span');
-      toTokenBadge.className = 'purple-badge';
-      toTokenBadge.textContent = 'Default';
-      document.getElementById('toTokenSymbol').appendChild(toTokenBadge);
-    }
-
   } else {
     window.currentSwapData = null;
     window.currentBestSwap = {
@@ -439,21 +423,15 @@ async function updateUIWithResults(result, amountInParsed) {
       path: result.path
     };
     bestRouterElement.textContent = result.routerName;
-
-    // Add purple badge for default tokens
-    if (isDefaultToken(fromToken)) {
-      const fromTokenBadge = document.createElement('span');
-      fromTokenBadge.className = 'purple-badge';
-      fromTokenBadge.textContent = 'Default';
-      document.getElementById('fromTokenSymbol').appendChild(fromTokenBadge);
-    }
-    if (isDefaultToken(toToken)) {
-      const toTokenBadge = document.createElement('span');
-      toTokenBadge.className = 'purple-badge';
-      toTokenBadge.textContent = 'Default';
-      document.getElementById('toTokenSymbol').appendChild(toTokenBadge);
-    }
   }
+
+  let swapPath = null;
+  if (result.type === 'multi' && result.swapData && result.swapData.path) {
+    swapPath = result.swapData.path;
+  } else if (result.path) {
+    swapPath = result.path;
+  }
+  displaySwapPath(swapPath);
 
   const toTokenPrice = await getTokenPriceUSD(toToken);
   if (toTokenPrice) {
@@ -484,6 +462,8 @@ async function calculateAndDisplayPriceImpact(amountInParsed, estimatedOutput) {
   currentPriceImpact = impact;
 
   const priceImpactEl = document.getElementById("priceImpact");
+  const swapButton = document.getElementById("swapButton");
+
   if (priceImpactEl) {
     priceImpactEl.innerText = `${impact.toFixed(2)}%`;
 
@@ -496,6 +476,59 @@ async function calculateAndDisplayPriceImpact(amountInParsed, estimatedOutput) {
       priceImpactEl.classList.add('high');
     }
   }
+
+  if (swapButton) {
+    swapButton.classList.remove('price-impact-low', 'price-impact-medium', 'price-impact-high');
+    if (impact < 1) {
+      swapButton.classList.add('price-impact-low');
+    } else if (impact < 5) {
+      swapButton.classList.add('price-impact-medium');
+    } else {
+      swapButton.classList.add('price-impact-high');
+    }
+  }
+}
+
+function displaySwapPath(path) {
+  const swapPathRow = document.getElementById("swapPathRow");
+  const swapPathEl = document.getElementById("swapPath");
+
+  if (!swapPathRow || !swapPathEl) return;
+
+  if (!path || path.length < 2) {
+    swapPathRow.style.display = "none";
+    return;
+  }
+
+  swapPathRow.style.display = "flex";
+
+  const allTokens = [...defaultTokens, ...importedTokens];
+  const wmonAddress = defaultTokens.find(t => t.symbol === "WMON")?.address?.toLowerCase();
+
+  let pathHtml = "";
+  for (let i = 0; i < path.length; i++) {
+    const address = path[i].toLowerCase();
+    let token = allTokens.find(t => t.address.toLowerCase() === address);
+
+    if (!token && address === wmonAddress) {
+      if (i === 0 && fromToken?.symbol === "MON") {
+        token = fromToken;
+      } else if (i === path.length - 1 && toToken?.symbol === "MON") {
+        token = toToken;
+      }
+    }
+
+    const symbol = token ? token.symbol : `${address.slice(0, 6)}...`;
+    const logo = token?.logo || "https://monbridgedex.xyz/unknown.png";
+
+    pathHtml += `<span class="swap-path-token"><img src="${logo}" alt="${symbol}" />${symbol}</span>`;
+
+    if (i < path.length - 1) {
+      pathHtml += `<span class="swap-path-arrow">→</span>`;
+    }
+  }
+
+  swapPathEl.innerHTML = pathHtml;
 }
 
 function createCacheData(result) {
