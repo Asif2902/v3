@@ -450,14 +450,6 @@ best swap rates, DEX bridge, crypto trading, Monad Dex aggregator">
     }
   }
 
-  // Override the default token symbol update to prevent "default" suffix
-  function updateTokenSymbol(elementId, symbol) {
-    const element = document.getElementById(elementId);
-    if (element) {
-      element.innerText = symbol;
-    }
-  }
-
   // Function to update token modals when wallet connects/disconnects
   function updateSwapTokenModals() {
     if (window.tokenModals) {

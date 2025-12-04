@@ -125,29 +125,17 @@ function loadTokens() {
       div.addEventListener("click", () => {
         if (side === "from") {
           fromToken = token;
-          const fromLogo = document.getElementById("fromTokenLogo");
-          const fromSymbol = document.getElementById("fromTokenSymbol");
-          if (fromLogo) {
-            fromLogo.src = (token.logo && token.logo !== "?") 
-              ? token.logo 
-              : "https://monbridgedex.xyz/unknown.png";
-          }
-          if (fromSymbol) {
-            fromSymbol.textContent = token.symbol;
-          }
+          document.getElementById("fromTokenLogo").src = (token.logo && token.logo !== "?") 
+            ? token.logo 
+            : "https://monbridgedex.xyz/unknown.png";
+          document.getElementById("fromTokenSymbol").innerText = token.symbol;
           fetchTokenBalance(token, "from");
         } else {
           toToken = token;
-          const toLogo = document.getElementById("toTokenLogo");
-          const toSymbol = document.getElementById("toTokenSymbol");
-          if (toLogo) {
-            toLogo.src = (token.logo && token.logo !== "?") 
-              ? token.logo 
-              : "https://monbridgedex.xyz/unknown.png";
-          }
-          if (toSymbol) {
-            toSymbol.textContent = token.symbol;
-          }
+          document.getElementById("toTokenLogo").src = (token.logo && token.logo !== "?") 
+            ? token.logo 
+            : "https://monbridgedex.xyz/unknown.png";
+          document.getElementById("toTokenSymbol").innerText = token.symbol;
           fetchTokenBalance(token, "to");
         }
         estimateSwap();
@@ -180,66 +168,66 @@ function setTokenPair() {
 
   if (fromTokenFound) {
     fromToken = fromTokenFound;
-    const fromLogo = document.getElementById("fromTokenLogo");
-    const fromSymbol = document.getElementById("fromTokenSymbol");
-    if (fromLogo) fromLogo.src = (fromToken.logo && fromToken.logo !== "?") ? fromToken.logo : "https://monbridgedex.xyz/unknown.png";
-    if (fromSymbol) fromSymbol.textContent = fromToken.symbol;
+    document.getElementById("fromTokenLogo").src = (fromToken.logo && fromToken.logo !== "?")
+      ? fromToken.logo
+      : "https://monbridgedex.xyz/unknown.png";
+    document.getElementById("fromTokenSymbol").innerText = fromToken.symbol;
   } else if (fromTokenSymbolOrAddress.startsWith('0x')) {
     importToken(fromTokenSymbolOrAddress).then(importedToken => {
       if (importedToken) {
         fromToken = importedToken;
-        const fromLogo = document.getElementById("fromTokenLogo");
-        const fromSymbol = document.getElementById("fromTokenSymbol");
-        if (fromLogo) fromLogo.src = (fromToken.logo && fromToken.logo !== "?") ? fromToken.logo : "https://monbridgedex.xyz/unknown.png";
-        if (fromSymbol) fromSymbol.textContent = fromToken.symbol;
+        document.getElementById("fromTokenLogo").src = (fromToken.logo && fromToken.logo !== "?")
+          ? fromToken.logo
+          : "https://monbridgedex.xyz/unknown.png";
+        document.getElementById("fromTokenSymbol").innerText = fromToken.symbol;
         fetchTokenBalance(fromToken, "from");
         estimateSwap();
       } else {
         fromToken = allTokens.find(t => t.symbol === "MON");
-        const fromLogo = document.getElementById("fromTokenLogo");
-        const fromSymbol = document.getElementById("fromTokenSymbol");
-        if (fromLogo) fromLogo.src = (fromToken.logo && fromToken.logo !== "?") ? fromToken.logo : "https://monbridgedex.xyz/unknown.png";
-        if (fromSymbol) fromSymbol.textContent = fromToken.symbol;
+        document.getElementById("fromTokenLogo").src = (fromToken.logo && fromToken.logo !== "?")
+          ? fromToken.logo
+          : "https://monbridgedex.xyz/unknown.png";
+        document.getElementById("fromTokenSymbol").innerText = fromToken.symbol;
       }
     });
   } else {
     fromToken = allTokens.find(t => t.symbol === "MON");
-    const fromLogo = document.getElementById("fromTokenLogo");
-    const fromSymbol = document.getElementById("fromTokenSymbol");
-    if (fromLogo) fromLogo.src = (fromToken.logo && fromToken.logo !== "?") ? fromToken.logo : "https://monbridgedex.xyz/unknown.png";
-    if (fromSymbol) fromSymbol.textContent = fromToken.symbol;
+    document.getElementById("fromTokenLogo").src = (fromToken.logo && fromToken.logo !== "?")
+      ? fromToken.logo
+      : "https://monbridgedex.xyz/unknown.png";
+    document.getElementById("fromTokenSymbol").innerText = fromToken.symbol;
   }
 
   if (toTokenFound) {
     toToken = toTokenFound;
-    const toLogo = document.getElementById("toTokenLogo");
-    const toSymbol = document.getElementById("toTokenSymbol");
-    if (toLogo) toLogo.src = (toToken.logo && toToken.logo !== "?") ? toToken.logo : "https://monbridgedex.xyz/unknown.png";
-    if (toSymbol) toSymbol.textContent = toToken.symbol;
+    document.getElementById("toTokenLogo").src = (toToken.logo && toToken.logo !== "?")
+      ? toToken.logo
+      : "https://monbridgedex.xyz/unknown.png";
+    document.getElementById("toTokenSymbol").innerText = toToken.symbol;
   } else if (toTokenSymbolOrAddress.startsWith('0x')) {
     importToken(toTokenSymbolOrAddress).then(importedToken => {
       if (importedToken) {
         toToken = importedToken;
-        const toLogo = document.getElementById("toTokenLogo");
-        const toSymbol = document.getElementById("toTokenSymbol");
-        if (toLogo) toLogo.src = (toToken.logo && toToken.logo !== "?") ? toToken.logo : "https://monbridgedex.xyz/unknown.png";
-        if (toSymbol) toSymbol.textContent = toToken.symbol;
+        document.getElementById("toTokenLogo").src = (toToken.logo && toToken.logo !== "?")
+          ? toToken.logo
+          : "https://monbridgedex.xyz/unknown.png";
+        document.getElementById("toTokenSymbol").innerText = toToken.symbol;
         fetchTokenBalance(toToken, "to");
         estimateSwap();
       } else {
         toToken = allTokens.find(t => t.symbol === "USDC");
-        const toLogo = document.getElementById("toTokenLogo");
-        const toSymbol = document.getElementById("toTokenSymbol");
-        if (toLogo) toLogo.src = (toToken.logo && toToken.logo !== "?") ? toToken.logo : "https://monbridgedex.xyz/unknown.png";
-        if (toSymbol) toSymbol.textContent = toToken.symbol;
+        document.getElementById("toTokenLogo").src = (toToken.logo && toToken.logo !== "?")
+          ? toToken.logo
+          : "https://monbridgedex.xyz/unknown.png";
+        document.getElementById("toTokenSymbol").innerText = toToken.symbol;
       }
     });
   } else {
     toToken = allTokens.find(t => t.symbol === "USDC");
-    const toLogo = document.getElementById("toTokenLogo");
-    const toSymbol = document.getElementById("toTokenSymbol");
-    if (toLogo) toLogo.src = (toToken.logo && toToken.logo !== "?") ? toToken.logo : "https://monbridgedex.xyz/unknown.png";
-    if (toSymbol) toSymbol.textContent = toToken.symbol;
+    document.getElementById("toTokenLogo").src = (toToken.logo && toToken.logo !== "?")
+      ? toToken.logo
+      : "https://monbridgedex.xyz/unknown.png";
+    document.getElementById("toTokenSymbol").innerText = toToken.symbol;
   }
 
   if (!provider) {
