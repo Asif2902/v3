@@ -468,9 +468,9 @@ async function calculateAndDisplayPriceImpact(amountInParsed, estimatedOutput) {
     priceImpactEl.innerText = `${impact.toFixed(2)}%`;
 
     priceImpactEl.classList.remove('low', 'medium', 'high');
-    if (impact < 1) {
+    if (impact < 5) {
       priceImpactEl.classList.add('low');
-    } else if (impact < 5) {
+    } else if (impact < 15) {
       priceImpactEl.classList.add('medium');
     } else {
       priceImpactEl.classList.add('high');
@@ -479,11 +479,9 @@ async function calculateAndDisplayPriceImpact(amountInParsed, estimatedOutput) {
 
   if (swapButton) {
     swapButton.classList.remove('price-impact-low', 'price-impact-medium', 'price-impact-high');
-    if (impact < 1) {
-      swapButton.classList.add('price-impact-low');
-    } else if (impact < 5) {
+    if (impact >= 5 && impact < 15) {
       swapButton.classList.add('price-impact-medium');
-    } else {
+    } else if (impact >= 15) {
       swapButton.classList.add('price-impact-high');
     }
   }
