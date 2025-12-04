@@ -14,8 +14,8 @@ const DEX_ROUTERS = [
     type: "UniswapV2"
   },
   {
-    name: "Pinot Finance",
-    address: "0x276e41572bb7A063EC728d659467d42BC91f9f6c",
+    name: "Pinot Finance v2",
+    address: "0x452146eb925F089A5999976674f40692aD44549C",
     type: "UniswapV2"
   },
   {
@@ -49,6 +49,11 @@ const V3_ROUTERS = [
   {
     name: "Uniswap V3",
     address: "0xd6145b2D3F379919E8CdEda7B97e37c4b2Ca9c40"
+  },
+  {
+    name: "Pinot Finance v3",
+    address:
+"0x252b9C1A6C9867a514ea70fe9bBB23621ACc1a50"
   },
   {
     name: "Monday Trade",
