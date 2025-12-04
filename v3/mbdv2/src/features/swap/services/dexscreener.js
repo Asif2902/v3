@@ -252,7 +252,10 @@ async function fetchTokenLogoFromProfile(tokenAddress) {
     // Try to get token info by searching for its pairs
     const response = await fetch(
       `${DEXSCREENER_API}/latest/dex/tokens/${tokenAddress}`,
-      { headers: { 'Accept': 'application/json' } }
+      { 
+        headers: { 'Accept': 'application/json' },
+        signal: AbortSignal.timeout(5000) // 5 second timeout
+      }
     );
 
     if (!response.ok) return null;
@@ -260,19 +263,24 @@ async function fetchTokenLogoFromProfile(tokenAddress) {
     const data = await response.json();
     if (!data.pairs || data.pairs.length === 0) return null;
 
-    // Find a pair with logo info
+    // Find a pair with logo info and validate URL
     for (const pair of data.pairs) {
       if (pair.info?.imageUrl) {
-        tokenProfileCache.set(cacheKey, {
-          data: pair.info.imageUrl,
-          timestamp: Date.now()
-        });
-        return pair.info.imageUrl;
+        const logoUrl = pair.info.imageUrl;
+        // Basic URL validation
+        if (logoUrl.startsWith('http://') || logoUrl.startsWith('https://')) {
+          tokenProfileCache.set(cacheKey, {
+            data: logoUrl,
+            timestamp: Date.now()
+          });
+          return logoUrl;
+        }
       }
     }
 
     return null;
   } catch (error) {
+    console.warn(`Failed to fetch logo for ${tokenAddress}:`, error.message);
     return null;
   }
 }

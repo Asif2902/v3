@@ -232,9 +232,13 @@ class TokenModal {
     const formattedAddress = token.address === "MON" ? "Native Token" : 
       `${token.address.substring(0, 6)}...${token.address.substring(token.address.length - 4)}`;
 
+    const logoUrl = token.logo && token.logo !== '?' ? token.logo : 'https://monbridgedex.xyz/unknown.png';
+
     item.innerHTML = `
-      <img src="${token.logo && token.logo !== '?' ? token.logo : 'https://monbridgedex.xyz/unknown.png'}" 
-           class="token-modal-item-img" alt="${token.symbol}">
+      <img src="${logoUrl}" 
+           class="token-modal-item-img" 
+           alt="${token.symbol}"
+           onerror="this.onerror=null; this.src='https://monbridgedex.xyz/unknown.png';">
       <div class="token-modal-item-info">
         <div class="token-modal-item-symbol">${token.symbol}</div>
         <div class="token-modal-item-name">${formattedAddress}</div>
@@ -393,9 +397,13 @@ class TokenModal {
       ? `$${(tokenInfo.liquidity / 1000).toFixed(1)}k` 
       : 'Unknown';
 
+    const logoUrl = tokenInfo.logo || 'https://monbridgedex.xyz/unknown.png';
+
     item.innerHTML = `
-      <img src="${tokenInfo.logo || 'https://monbridgedex.xyz/unknown.png'}" 
-           class="token-modal-item-img" alt="${tokenInfo.symbol}">
+      <img src="${logoUrl}" 
+           class="token-modal-item-img" 
+           alt="${tokenInfo.symbol}"
+           onerror="this.onerror=null; this.src='https://monbridgedex.xyz/unknown.png';">
       <div class="token-modal-item-info">
         <div class="token-modal-item-symbol">${tokenInfo.symbol}</div>
         <div class="token-modal-item-name">${tokenInfo.name || 'From DexScreener'}</div>
