@@ -249,6 +249,25 @@ class TokenModal {
     return item;
   }
 
+  // Fuzzy match helper - checks if query chars appear in order in text
+  fuzzyMatch(text, query) {
+    if (!text || !query) return false;
+    const textLower = text.toLowerCase();
+    const queryLower = query.toLowerCase();
+    
+    // First check exact substring match
+    if (textLower.includes(queryLower)) return true;
+    
+    // Then fuzzy match - all query chars must appear in order
+    let queryIndex = 0;
+    for (let i = 0; i < textLower.length && queryIndex < queryLower.length; i++) {
+      if (textLower[i] === queryLower[queryIndex]) {
+        queryIndex++;
+      }
+    }
+    return queryIndex === queryLower.length;
+  }
+
   async handleSearch(searchTerm) {
     this.currentSearch = searchTerm.trim().toLowerCase();
     const commonTokensSection = this.modal.querySelector('.common-tokens');
@@ -261,9 +280,11 @@ class TokenModal {
       clearTimeout(this.searchDebounceTimer);
     }
 
-    // Search through all tokens (local search is instant)
+    // Search through all tokens using fuzzy matching
+    // Example: "mon" will match "gmonad" because g-M-O-N-ad contains m-o-n in order
     let filteredTokens = this.tokens.filter(token => 
-      token.symbol.toLowerCase().includes(this.currentSearch) || 
+      this.fuzzyMatch(token.symbol, this.currentSearch) || 
+      this.fuzzyMatch(token.name, this.currentSearch) ||
       token.address.toLowerCase().includes(this.currentSearch)
     );
 

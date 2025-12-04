@@ -93,7 +93,35 @@ async function searchTokenByAddress(address) {
 }
 
 /**
+ * Fuzzy match - checks if query characters appear in order within text
+ * Example: "mon" matches "gmonad" because g-M-O-N-ad contains m-o-n in order
+ * @param {string} text - Text to search in
+ * @param {string} query - Search query
+ * @returns {boolean} True if fuzzy match found
+ */
+function fuzzyMatch(text, query) {
+  if (!text || !query) return false;
+  
+  const textLower = text.toLowerCase();
+  const queryLower = query.toLowerCase();
+  
+  // First check exact substring match (higher priority)
+  if (textLower.includes(queryLower)) return true;
+  
+  // Then check fuzzy match - all query chars must appear in order
+  let queryIndex = 0;
+  for (let i = 0; i < textLower.length && queryIndex < queryLower.length; i++) {
+    if (textLower[i] === queryLower[queryIndex]) {
+      queryIndex++;
+    }
+  }
+  
+  return queryIndex === queryLower.length;
+}
+
+/**
  * Search token by symbol or name - returns MULTIPLE matching tokens
+ * Supports fuzzy matching (e.g., "mon" finds "gmonad")
  * @param {string} query - Search query
  * @returns {Promise<Array>} Array of matching tokens
  */
@@ -125,14 +153,13 @@ async function searchTokenByQuery(query) {
       return [];
     }
 
-    // Extract unique tokens that match the query
+    // Extract unique tokens that match the query (using fuzzy matching)
     const tokenMap = new Map();
-    const queryLower = query.toLowerCase();
 
     for (const pair of monadPairs) {
-      // Check base token
-      if (pair.baseToken.symbol.toLowerCase().includes(queryLower) ||
-          pair.baseToken.name?.toLowerCase().includes(queryLower)) {
+      // Check base token with fuzzy matching
+      if (fuzzyMatch(pair.baseToken.symbol, query) ||
+          fuzzyMatch(pair.baseToken.name, query)) {
         const address = pair.baseToken.address.toLowerCase();
         if (!tokenMap.has(address)) {
           tokenMap.set(address, {
@@ -145,25 +172,27 @@ async function searchTokenByQuery(query) {
             pairAddress: pair.pairAddress
           });
         } else {
-          // Update if this pair has higher liquidity
+          // Update if this pair has higher liquidity or has a logo
           const existing = tokenMap.get(address);
           if ((pair.liquidity?.usd || 0) > existing.liquidity) {
             existing.liquidity = pair.liquidity?.usd || 0;
-            existing.logo = pair.info?.imageUrl || existing.logo;
+          }
+          if (!existing.logo && pair.info?.imageUrl) {
+            existing.logo = pair.info.imageUrl;
           }
         }
       }
 
-      // Check quote token
-      if (pair.quoteToken.symbol.toLowerCase().includes(queryLower) ||
-          pair.quoteToken.name?.toLowerCase().includes(queryLower)) {
+      // Check quote token with fuzzy matching
+      if (fuzzyMatch(pair.quoteToken.symbol, query) ||
+          fuzzyMatch(pair.quoteToken.name, query)) {
         const address = pair.quoteToken.address.toLowerCase();
         if (!tokenMap.has(address)) {
           tokenMap.set(address, {
             address: pair.quoteToken.address,
             symbol: pair.quoteToken.symbol,
             name: pair.quoteToken.name,
-            logo: null, // Quote tokens don't have logo in pair info
+            logo: null, // Will be fetched separately if needed
             priceUsd: null,
             liquidity: pair.liquidity?.usd || 0,
             pairAddress: pair.pairAddress
@@ -179,14 +208,72 @@ async function searchTokenByQuery(query) {
     }
 
     // Convert map to array and sort by liquidity (highest first)
-    const tokens = Array.from(tokenMap.values())
+    let tokens = Array.from(tokenMap.values())
       .sort((a, b) => (b.liquidity || 0) - (a.liquidity || 0))
       .slice(0, 10); // Limit to top 10 results
+
+    // Try to fetch logos for tokens that don't have one (in parallel, non-blocking)
+    tokens = await Promise.all(tokens.map(async (token) => {
+      if (!token.logo) {
+        try {
+          const logo = await fetchTokenLogoFromProfile(token.address);
+          if (logo) {
+            token.logo = logo;
+          }
+        } catch (e) {
+          // Silently fail - logo is optional
+        }
+      }
+      return token;
+    }));
 
     return tokens;
   } catch (error) {
     console.error('Error searching token by query:', error);
     return [];
+  }
+}
+
+/**
+ * Fetch token logo from DexScreener profile API
+ * @param {string} tokenAddress - Token contract address
+ * @returns {Promise<string|null>} Logo URL or null
+ */
+async function fetchTokenLogoFromProfile(tokenAddress) {
+  const cacheKey = `logo_${tokenAddress.toLowerCase()}`;
+  
+  // Check cache
+  const cached = tokenProfileCache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < PROFILE_CACHE_DURATION) {
+    return cached.data;
+  }
+
+  try {
+    // Try to get token info by searching for its pairs
+    const response = await fetch(
+      `${DEXSCREENER_API}/latest/dex/tokens/${tokenAddress}`,
+      { headers: { 'Accept': 'application/json' } }
+    );
+
+    if (!response.ok) return null;
+
+    const data = await response.json();
+    if (!data.pairs || data.pairs.length === 0) return null;
+
+    // Find a pair with logo info
+    for (const pair of data.pairs) {
+      if (pair.info?.imageUrl) {
+        tokenProfileCache.set(cacheKey, {
+          data: pair.info.imageUrl,
+          timestamp: Date.now()
+        });
+        return pair.info.imageUrl;
+      }
+    }
+
+    return null;
+  } catch (error) {
+    return null;
   }
 }
 
@@ -240,6 +327,8 @@ if (typeof module !== 'undefined' && module.exports) {
     searchTokenByAddress,
     searchTokenByQuery,
     getTokenProfile,
-    getTokenLogo
+    getTokenLogo,
+    fetchTokenLogoFromProfile,
+    fuzzyMatch
   };
 }
