@@ -2863,6 +2863,24 @@ div#fromTokenList::-webkit-scrollbar {
   font-weight: 600;
   font-size: 16px;
   color: var(--text-color);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.token-verified-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  background: linear-gradient(135deg, #9333ea, #a855f7);
+  color: white;
+  border-radius: 50%;
+  font-size: 10px;
+  font-weight: bold;
+  box-shadow: 0 2px 4px rgba(147, 51, 234, 0.3);
+  flex-shrink: 0;
 }
 
 .token-modal-item-name {

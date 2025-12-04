@@ -13,7 +13,7 @@ async function estimateSwap(retryCount = 0, forceRefresh = false) {
   }
 
   pendingRequests.add(requestKey);
-  
+
   setTimeout(() => {
     pendingRequests.delete(requestKey);
   }, 5000);
@@ -217,7 +217,7 @@ async function getMultiSplitEstimate(amountInParsed, fromToken, toToken, retryCo
 
     const slippageBPS = Math.round(slippageTolerance * 100);
 
-    const swapData = await rateLimitedCall(() => 
+    const swapData = await rateLimitedCall(() =>
       multiSplitHopContract.getBestSwapData(amountInParsed, path, false, slippageBPS)
     );
 
@@ -257,7 +257,9 @@ async function getMultiSplitEstimate(amountInParsed, fromToken, toToken, retryCo
       estimatedOutput: estimatedOutput.toFixed(6),
       routerName: routerName,
       swapData: swapData,
-      amountOutMin: swapData.amountOutMin
+      amountOutMin: swapData.amountOutMin,
+      routerAddress: swapData.router,
+      version: routerType === 1 ? 'v3' : (routerType === 0 ? 'v2' : 'unknown')
     };
 
   } catch (error) {
@@ -321,7 +323,8 @@ async function getSingleSplitEstimate(amountInParsed, fromToken, toToken, retryC
       routerName: routerName,
       routerAddress: bestSwap[0],
       amountOut: bestSwap[1],
-      path: path
+      path: path,
+      version: 'v2'
     };
 
   } catch (error) {
@@ -385,6 +388,8 @@ async function updateUIWithResults(result, amountInParsed) {
 
   document.getElementById("estimatedOutput").innerText = estimatedOutput.toFixed(6);
 
+  const isDefaultToken = (token) => defaultTokens.some(dt => dt.address.toLowerCase() === token.address.toLowerCase());
+
   if (result.type === 'multi' && result.swapData) {
     window.currentSwapData = result.swapData;
     window.currentBestSwap = null;
@@ -411,6 +416,21 @@ async function updateUIWithResults(result, amountInParsed) {
 
     bestRouterElement.appendChild(document.createTextNode(' '));
     bestRouterElement.appendChild(betaTag);
+
+    // Add purple badge for default tokens
+    if (isDefaultToken(fromToken)) {
+      const fromTokenBadge = document.createElement('span');
+      fromTokenBadge.className = 'purple-badge';
+      fromTokenBadge.textContent = 'Default';
+      document.getElementById('fromTokenSymbol').appendChild(fromTokenBadge);
+    }
+    if (isDefaultToken(toToken)) {
+      const toTokenBadge = document.createElement('span');
+      toTokenBadge.className = 'purple-badge';
+      toTokenBadge.textContent = 'Default';
+      document.getElementById('toTokenSymbol').appendChild(toTokenBadge);
+    }
+
   } else {
     window.currentSwapData = null;
     window.currentBestSwap = {
@@ -419,6 +439,20 @@ async function updateUIWithResults(result, amountInParsed) {
       path: result.path
     };
     bestRouterElement.textContent = result.routerName;
+
+    // Add purple badge for default tokens
+    if (isDefaultToken(fromToken)) {
+      const fromTokenBadge = document.createElement('span');
+      fromTokenBadge.className = 'purple-badge';
+      fromTokenBadge.textContent = 'Default';
+      document.getElementById('fromTokenSymbol').appendChild(fromTokenBadge);
+    }
+    if (isDefaultToken(toToken)) {
+      const toTokenBadge = document.createElement('span');
+      toTokenBadge.className = 'purple-badge';
+      toTokenBadge.textContent = 'Default';
+      document.getElementById('toTokenSymbol').appendChild(toTokenBadge);
+    }
   }
 
   const toTokenPrice = await getTokenPriceUSD(toToken);

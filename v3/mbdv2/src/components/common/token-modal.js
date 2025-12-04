@@ -234,13 +234,17 @@ class TokenModal {
 
     const logoUrl = token.logo && token.logo !== '?' ? token.logo : 'https://monbridgedex.xyz/unknown.png';
 
+    // Check if token is a default token
+    const isDefaultToken = this.defaultTokens.some(t => t.address.toLowerCase() === token.address.toLowerCase());
+    const badgeHtml = isDefaultToken ? '<span class="token-verified-badge" title="Verified Token">✓</span>' : '';
+
     item.innerHTML = `
       <img src="${logoUrl}" 
            class="token-modal-item-img" 
            alt="${token.symbol}"
            onerror="this.onerror=null; this.src='https://monbridgedex.xyz/unknown.png';">
       <div class="token-modal-item-info">
-        <div class="token-modal-item-symbol">${token.symbol}</div>
+        <div class="token-modal-item-symbol">${token.symbol}${badgeHtml}</div>
         <div class="token-modal-item-name">${formattedAddress}</div>
       </div>
       <div class="token-modal-item-balance">${balanceText}</div>
@@ -399,13 +403,17 @@ class TokenModal {
 
     const logoUrl = tokenInfo.logo || 'https://monbridgedex.xyz/unknown.png';
 
+    // Check if token is a default token
+    const isDefaultToken = this.defaultTokens.some(t => t.address.toLowerCase() === tokenInfo.address.toLowerCase());
+    const badgeHtml = isDefaultToken ? '<span class="token-verified-badge" title="Verified Token">✓</span>' : '';
+
     item.innerHTML = `
       <img src="${logoUrl}" 
            class="token-modal-item-img" 
            alt="${tokenInfo.symbol}"
            onerror="this.onerror=null; this.src='https://monbridgedex.xyz/unknown.png';">
       <div class="token-modal-item-info">
-        <div class="token-modal-item-symbol">${tokenInfo.symbol}</div>
+        <div class="token-modal-item-symbol">${tokenInfo.symbol}${badgeHtml}</div>
         <div class="token-modal-item-name">${tokenInfo.name || 'From DexScreener'}</div>
       </div>
       <div class="token-modal-item-balance">
