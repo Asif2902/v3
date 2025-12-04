@@ -1,8 +1,5 @@
 {
   "dependencies": {
     "serve": "^14.2.5"
-  },
-  "scripts": {
-    "start": "serve -s . -l 5000 --no-request-logging"
   }
 }
